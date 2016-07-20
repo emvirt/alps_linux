@@ -843,7 +843,7 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 	raw_local_irq_save(flags);
 	this_cpu = smp_processor_id();
 
-//hjpark
+//HJPARK
 	p = "0[37;1m";
 	p[0] = 0x1b;
 	strcpy(printk_buf, p);

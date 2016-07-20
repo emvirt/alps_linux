@@ -39,7 +39,6 @@
 #include <asm/tlbflush.h>
 #include <asm/ptrace.h>
 #include <asm/localtimer.h>
-#include <asm/mach/time.h>	/*kwlee*/
 
 //cylee : set a flag value for tzipc read in tzipc.c
 extern void set_ready_to_read(void);
@@ -50,8 +49,6 @@ extern void set_ready_to_read(void);
  * where to place its SVC stack
  */
 struct secondary_data secondary_data;
-//kwlee
-//struct irqaction mxc_timer_irq;
 
 enum ipi_msg_type {
 	IPI_TIMER = 2,
@@ -59,8 +56,7 @@ enum ipi_msg_type {
 	IPI_CALL_FUNC,
 	IPI_CALL_FUNC_SINGLE,
 	IPI_CPU_STOP,
-	IPI_TZIPC,		//hjpark
-	IPI_T_SWITCH,		//hjpark
+	IPI_TZIPC,		//cylee
 };
 
 
@@ -278,10 +274,11 @@ static void __cpuinit smp_store_cpu_info(unsigned int cpuid)
  * This is the secondary CPU boot entry.  We're using this CPUs
  * idle thread stack, but a set of temporary page tables.
  */
+
+//SWKIM
+extern int send_singal_to_user_tasklet(void *arg);
 asmlinkage void __cpuinit secondary_start_kernel(void)
 {
-//HJPARK __asm__("b	.\n");		
-
 	struct mm_struct *mm = &init_mm;
 	unsigned int cpu = smp_processor_id();
 	
@@ -328,14 +325,12 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 
 	local_irq_enable();
 	local_fiq_enable();
-      /* 
- 	asm volatile("str  r0,[sp]\n;""mov r0, #3\n;");         //hjpark T_SMC_SWITCH_BOOT
-        asm volatile(".word 0xE1600070\n");
-        asm volatile("ldr r0, [sp]\n");
-*/
 	/*
 	 * OK, it's off to the idle thread for us
 	 */
+	//SWKIM
+	//__asm("bkpt");
+	//send_singal_to_user_tasklet(NULL);
 	cpu_idle();
 }
 
@@ -386,9 +381,6 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 		 */
 		platform_smp_prepare_cpus(max_cpus);
 	}
-/*kwlee
-	mxc_timer_irq.flags=IRQF_DISABLED | IRQF_IRQPOLL;
-*/
 }
 
 static void (*smp_cross_call)(const struct cpumask *, unsigned int);
@@ -564,14 +556,6 @@ static void ipi_cpu_stop(unsigned int cpu)
 	while (1)
 		cpu_relax();
 }
-//hjpark
-void t_smc_call(){
-        printk("IPI_T_SWITCH \n");
-	
-        asm volatile("str  r0,[sp]\n;""mov r0, #3\n;");         //hjpark T_SMC_SWITCH_BOOT
-        asm volatile(".word 0xE1600070\n");
-        asm volatile("ldr r0, [sp]\n");
-}
 /*
  * Main handler for inter-processor interrupts
  */
@@ -612,14 +596,10 @@ asmlinkage void __exception_irq_entry do_IPI(int ipinr, struct pt_regs *regs)
 		irq_exit();
 		break;
 	
-	case IPI_TZIPC:			//HJPARK
-		set_ready_to_read();    //cylee
+	case IPI_TZIPC:			
+		set_ready_to_read();    //CYLEE
 		break;
 	
-	case IPI_T_SWITCH:		//hjpark
-		t_smc_call();
-		break;
-
 	default:
 		printk(KERN_CRIT "CPU%u: Unknown IPI message 0x%x\n",
 		       cpu, ipinr);

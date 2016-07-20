@@ -186,7 +186,7 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 		return -EINVAL;
 
 	mask = 0xff << shift;
-	bit = 1 << (cpu + shift);		//HJPARK
+	bit = 1 << (cpu + shift);
 
 	spin_lock(&irq_controller_lock);
 	val = readl_relaxed(reg) & ~mask;
@@ -325,13 +325,8 @@ static void __init gic_dist_init(struct gic_chip_data *gic,
 	}
 
 	writel_relaxed(1, base + GIC_DIST_CTRL);
-/*kwlee*/
-//	writel_relaxed(3, base + GIC_DIST_CTRL);
-/*	int j;
-	for(j=0; j<32 ; j++)
-		writel_relaxed(0xffffffff, base + GIC_DIST_ISR + 4*j);
-*/
-	writel_relaxed(0x400000, base + GIC_DIST_ISR + 4);
+
+	writel_relaxed(0x400000, base + GIC_DIST_ISR + 4);	//HJPARK set uSDHC1 interrupt IRQ
 }
 
 //YSB
@@ -339,7 +334,7 @@ static void __init gic_dist_init(struct gic_chip_data *gic,
     __asm__ volatile ("mcr p15, 0, %0, c12, c0, 0"::"r"(x))
 
 static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
-{
+{ 
 	void __iomem *dist_base = gic->dist_base;
 	void __iomem *base = gic->cpu_base;
 	int i;
@@ -358,13 +353,10 @@ static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 		writel_relaxed(0xa0a0a0a0, dist_base + GIC_DIST_PRI + i * 4 / 4);
 
 	writel_relaxed(0xf0, base + GIC_CPU_PRIMASK);
-//YSB
-//	writel_relaxed(9, base + GIC_CPU_CTRL);
-	CP15_VBAR_WRITE(0xFFFF0000);
-//HJPARK
-	writel_relaxed(13, base + GIC_CPU_CTRL);
-	writel_relaxed(0xffffffff, base - 0x100 + 0x54 ); 	//kwlee SCR set
-//HJPARK	writel_relaxed(0x3c00000, dist_base + GIC_DIST_PENDING_SET);
+
+	CP15_VBAR_WRITE(0xFFFF0000);	//YSB set Linux vector base address
+	writel_relaxed(13, base + GIC_CPU_CTRL);	//HJPARK set this core receive only FIQ
+	writel_relaxed(0xffffffff, base - 0x100 + 0x54 ); 	//HJPARK set SCR register so that normal world can access timer
 }
 
 void gic_init(unsigned int gic_nr, unsigned int irq_start,

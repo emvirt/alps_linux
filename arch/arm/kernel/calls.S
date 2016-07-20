@@ -279,7 +279,7 @@
 		CALL(sys_fstatfs64_wrapper)
 		CALL(sys_tgkill)
 		CALL(sys_utimes)
-/* 270 */	CALL(sys_newcall) //hjpark CALL(sys_arm_fadvise64_64)
+/* 270 */	CALL(sys_newcall) //HJPARK CALL(sys_arm_fadvise64_64)
 		CALL(sys_pciconfig_iobase)
 		CALL(sys_pciconfig_read)
 		CALL(sys_pciconfig_write)

@@ -59,13 +59,13 @@ static struct map_desc mx6_io_desc[] __initdata = {
 	.pfn = __phys_to_pfn(ARM_PERIPHBASE),
 	.length = ARM_PERIPHBASE_SIZE,
 	.type = MT_DEVICE},
-	//HJPARK
+	/*HJPARK: set monitor's address space*/
 	{
 	.virtual = 0xf1f00000,
 	.pfn = __phys_to_pfn(0x7ff00000),
 	.length = 0x100000,
 	.type = MT_MEMORY},
-	//cylee
+	/*cylee: set shared memory address space*/
 	{
 	.virtual = tzipc_phys_to_virt(TZIPC_PHYS_MEM_ADDR),
 	.pfn = __phys_to_pfn(TZIPC_PHYS_MEM_ADDR),

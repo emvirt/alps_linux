@@ -39,11 +39,24 @@
 #include <asm/stacktrace.h>
 #include <asm/mach/time.h>
 
+//SWKIM
+#include "../../../drivers/staging/tzipc/tzipc.h"
+
 #ifdef CONFIG_CC_STACKPROTECTOR
 #include <linux/stackprotector.h>
 unsigned long __stack_chk_guard __read_mostly;
 EXPORT_SYMBOL(__stack_chk_guard);
 #endif
+
+
+
+//SWKIM
+extern int ready_to_read;
+extern struct sig_thr_t thread_info;
+extern int send_singal_to_user(void* arg);
+extern void tz_debug_start_tmr(void);
+extern void tz_debug_stop_tmr(int debug_level, int operation);
+
 
 static const char *processor_modes[] = {
   "USER_26", "FIQ_26" , "IRQ_26" , "SVC_26" , "UK4_26" , "UK5_26" , "UK6_26" , "UK7_26" ,
@@ -75,6 +88,7 @@ void enable_hlt(void)
 }
 
 EXPORT_SYMBOL(enable_hlt);
+
 
 static int __init nohlt_setup(char *__unused)
 {
@@ -179,7 +193,6 @@ EXPORT_SYMBOL(pm_idle);
 void cpu_idle(void)
 {
 	local_fiq_enable();
-
 	/* endless idle loop with no priority at all */
 	while (1) {
 		idle_notifier_call_chain(IDLE_START);
@@ -197,8 +210,6 @@ void cpu_idle(void)
 #endif
 			if (hlt_counter || tick_check_broadcast_pending()) {
 				local_irq_enable();
-//				asm volatile("mov r0, #0 \n");          //hjpark
-//                                asm volatile(".word 0xe1600070 ");      //hjpark
 				cpu_relax();
 			} else {
 				stop_critical_timings();
@@ -211,17 +222,40 @@ void cpu_idle(void)
 				 */
 				WARN_ON(irqs_disabled());
 				local_irq_enable();
-//				asm volatile("mov r0, #0 \n");          //hjpark
-//                                asm volatile(".word 0xe1600070 ");      //hjpark                                
 			}
 		}
 		leds_event(led_idle_end);
 		tick_nohz_restart_sched_tick();
 		idle_notifier_call_chain(IDLE_END);
 		preempt_enable_no_resched();
+		
+		//SWKIM
+		/*
+		if(ready_to_read) {
+			//send_singal_to_user(&thread_info);
+			//printk("Handled by cpu_idle\n");
+			tz_debug_stop_tmr(44, 111);
+			tz_debug_start_tmr();
+		}
+		*/
+		schedule();
+		preempt_disable();
+
+	}
+/*	
+	while(1) {
+		preempt_enable_no_resched();
+		//SWKIM
+		if(ready_to_read) {
+			//send_singal_to_user(&thread_info);
+			//printk("Handled by cpu_idle\n");
+			tz_debug_stop_tmr(44, 111);
+			tz_debug_start_tmr();
+		}
 		schedule();
 		preempt_disable();
 	}
+*/
 }
 
 static char reboot_mode = 'h';

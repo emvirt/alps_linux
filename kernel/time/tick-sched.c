@@ -497,14 +497,17 @@ static void tick_nohz_restart(struct tick_sched *ts, ktime_t now)
  */
 void tick_nohz_restart_sched_tick(void)
 {
-	int local_timer_state;
+	int local_timer_state;		//HJPARK
 	int cpu = smp_processor_id();
 	struct tick_sched *ts = &per_cpu(tick_cpu_sched, cpu);
 #ifndef CONFIG_VIRT_CPU_ACCOUNTING
 	unsigned long ticks;
 #endif
 	ktime_t now;
-/*HJPARK*/
+	
+	/*HJPARK: check local timer control register
+	 * set tick_stopped when timer enable bit is 0
+	*/
 	local_timer_state = __raw_readl(0xe9800600 + 0x8);	
 	if(local_timer_state == 4)
 		ts->tick_stopped = 1;

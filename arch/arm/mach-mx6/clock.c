@@ -209,7 +209,9 @@ static int _clk_enable(struct clk *clk)
 	u32 reg;
 	u32 usdhc1_reg;
 	reg = __raw_readl(clk->enable_reg);
-/*HJPARK*/
+	/*HJPARK: mask usdhc1_reg 
+	 *so that secure linux doesn't interfere normal dedicated device mmc1
+	 */
         if(clk->enable_reg == 0xf40c4080){
                 usdhc1_reg = reg;
                 usdhc1_reg &= 0xc;
@@ -229,7 +231,9 @@ static void _clk_disable(struct clk *clk)
 	u32 reg;
 	u32 usdhc1_reg;
 	reg = __raw_readl(clk->enable_reg);
-/*HJPARK*/
+        /*HJPARK: mask usdhc1_reg
+         *so that secure linux doesn't interfere normal dedicated device mmc1
+         */
         if(clk->enable_reg == 0xf40c4080){
                 usdhc1_reg = reg;
                 usdhc1_reg &= 0xc;

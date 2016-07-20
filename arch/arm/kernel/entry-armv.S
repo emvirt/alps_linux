@@ -150,9 +150,6 @@ ENDPROC(__und_invalid)
 
 	.align	5
 __dabt_svc:
-//        mrs     r9, cpsr
-//        orr     r9, r9, #PSR_I_BIT
-//        msr     cpsr, r9		//hjpark
 	svc_entry
 	
 	@
@@ -202,25 +199,6 @@ ENDPROC(__dabt_svc)
 
 	.align	5
 __irq_svc:
-/*hjpark
-	stmfd	sp!, {r0, r1}
-	ldr 	r1, [r0, #4]
-    	ldr 	r0, =0x77fff008
-    	cmp 	r0, r1
-    	beq     1f
-        ldr     r0, =0x1003ffc0
-	cmp 	r0, r1
-        beq	1f
-	b 	2f
-1:
-	b	.
-	mov	lr, r1
-    	ldmia 	sp!, {r0, r1}
-        ldr	r0, [r0]
-    	mov 	pc, lr
-2:
-	ldmia	sp!, {r0, r1}
-*/
 	svc_entry
 
 #ifdef CONFIG_TRACE_IRQFLAGS
@@ -265,9 +243,6 @@ svc_preempt:
 
 	.align	5
 __und_svc:
-//        mrs     r9, cpsr
-//        orr     r9, r9, #PSR_I_BIT
-//        msr     cpsr, r9                //hjpark
 #ifdef CONFIG_KPROBES
 	@ If a kprobe is about to simulate a "stmdb sp..." instruction,
 	@ it obviously needs free stack space which then will belong to

@@ -75,7 +75,8 @@ int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
 	/* set entry point for cpu1-cpu3*/
 //HJPARK	boot_entry = virt_to_phys(mx6_secondary_startup);
 
-	boot_entry = 0x7ff114c0;	/*HJPARK: monitor 'SafeGSecondaryBoot' address*/
+	//boot_entry = 0x7ff114c0;	/*HJPARK: monitor 'SafeGSecondaryBoot' address*/
+	boot_entry = 0x7ff112c0;	/*HJPARK: monitor 'SafeGSecondaryBoot' address*/
 
 	writel(boot_entry, src_base + SRC_GPR1_OFFSET + 4 * 2 * cpu);
 	writel(0, src_base + SRC_GPR1_OFFSET + 4 * 2 * cpu + 4);
@@ -84,7 +85,7 @@ int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
 	dsb();
 	flush_cache_all();
 
-	/* reset cpu<n> */
+	/* reset cpu */
 	val = readl(src_base + SRC_SCR_OFFSET);
 	val |= 1 << (BP_SRC_SCR_CORE0_RST + cpu);
 	val |= 1 << (BP_SRC_SCR_CORES_DBG_RST + cpu);

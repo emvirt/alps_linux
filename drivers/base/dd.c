@@ -104,14 +104,11 @@ EXPORT_SYMBOL_GPL(device_bind_driver);
 
 static atomic_t probe_count = ATOMIC_INIT(0);
 static DECLARE_WAIT_QUEUE_HEAD(probe_waitqueue);
-//int sdhci_counter=0;	//hjpark
+
 static int really_probe(struct device *dev, struct device_driver *drv)
 {
 	int ret = 0;
-	/*hjpark
-	if(drv->name=="sdhci")
-		sdhci_counter++;
-	*/
+
 	atomic_inc(&probe_count);
 	pr_debug("bus: '%s': %s: probing driver %s with device %s\n",
 		 drv->bus->name, __func__, drv->name, dev_name(dev));
@@ -129,10 +126,6 @@ static int really_probe(struct device *dev, struct device_driver *drv)
 		if (ret)
 			goto probe_failed;
 	} else if (drv->probe) {
-		/*hjpark
-		if ((drv->name == "sdhci")&&sdhci_counter==1)
-			goto probe_failed;
-		*/
 		ret = drv->probe(dev);
 		if (ret)
 			goto probe_failed;

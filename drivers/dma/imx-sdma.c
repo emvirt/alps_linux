@@ -118,7 +118,7 @@
  */
 #define CHANGE_ENDIANNESS   0x80
 
-int sdma_init_state=0;          //hjpark
+int sdma_init_state=0;          //HJPARK
 
 /*
  * Mode/Count of data node descriptors - IPCv2
@@ -553,7 +553,7 @@ static irqreturn_t sdma_int_handler(int irq, void *dev_id)
 	writel_relaxed(stat, sdma->regs + SDMA_H_INTR);
 
         if(sdma_init_state)
-                stat=1;                 //hjpark
+                stat=1;                 //HJPARK
 
 	spin_unlock_irqrestore(&sdma->irq_reg_lock, flag);
 
@@ -1503,7 +1503,7 @@ static int __init sdma_probe(struct platform_device *pdev)
 	int i;
 	struct sdma_engine *sdma;
  
-        sdma_init_state=1;              //hjpark
+        sdma_init_state=1;              //HJPARK
 
 	sdma = kzalloc(sizeof(*sdma), GFP_KERNEL);
 	if (!sdma)
@@ -1535,7 +1535,7 @@ static int __init sdma_probe(struct platform_device *pdev)
 		goto err_ioremap;
 	}
 
-//hjpark
+//HJPARK
         sdma->script_addrs = kzalloc(sizeof(*sdma->script_addrs), GFP_KERNEL);
         if (!sdma->script_addrs)
                 goto err_alloc;
@@ -1572,12 +1572,12 @@ static int __init sdma_probe(struct platform_device *pdev)
         if (ret)
                 goto err_init;
 
-//hjpark 
+//HJPARK 
 
 	ret = request_irq(irq, sdma_int_handler, 0, "sdma", sdma);
 	if (ret)
 		goto err_request_irq;
-/*hjpark
+/*HJPARK
 	sdma->script_addrs = kzalloc(sizeof(*sdma->script_addrs), GFP_KERNEL);
 	if (!sdma->script_addrs)
 		goto err_alloc;
@@ -1605,7 +1605,7 @@ static int __init sdma_probe(struct platform_device *pdev)
 		 * because we need it internally in the SDMA driver. This also means
 		 * that channel 0 in dmaengine counting matches sdma channel 1.
 		 */
-/*hjpark		if (i)
+/*HJPARK		if (i)
 			list_add_tail(&sdmac->chan.device_node,
 					&sdma->dma_device.channels);
 	}
@@ -1639,7 +1639,7 @@ static int __init sdma_probe(struct platform_device *pdev)
 
 	dev_info(sdma->dev, "initialized\n");
 
-        sdma_init_state=0;      //hjpark
+        sdma_init_state=0;      //HJPARK
 	return 0;
 
 err_init:
@@ -1656,7 +1656,7 @@ err_request_region:
 err_irq:
 	kfree(sdma);
 
-        sdma_init_state=0;      //hjpark
+        sdma_init_state=0;      //HJPARK
 	return ret;
 }
 

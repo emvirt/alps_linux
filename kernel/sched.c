@@ -83,6 +83,10 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/sched.h>
 
+//SWKIM
+extern int ready_to_read;
+extern void tz_debug_start_tmr(void);
+extern void tz_debug_stop_tmr(int debug_level, int operation);
 /*
  * Convert user-nice values [ -20 ... 0 ... 19 ]
  * to static priority [ MAX_RT_PRIO..MAX_PRIO-1 ],
@@ -3006,6 +3010,11 @@ static inline void
 prepare_task_switch(struct rq *rq, struct task_struct *prev,
 		    struct task_struct *next)
 {
+	//SWKIM
+	if(ready_to_read) {
+		tz_debug_stop_tmr(4, 11);
+		tz_debug_start_tmr();
+	}
 	sched_info_switch(prev, next);
 	perf_event_task_sched_out(prev, next);
 	fire_sched_out_preempt_notifiers(prev, next);
@@ -3069,6 +3078,12 @@ static void finish_task_switch(struct rq *rq, struct task_struct *prev)
 		 */
 		kprobe_flush_task(prev);
 		put_task_struct(prev);
+	}
+	//SWKIM
+	if(ready_to_read) {
+		tz_debug_stop_tmr(5, 222);
+		tz_debug_start_tmr();
+
 	}
 }
 
@@ -3174,6 +3189,9 @@ context_switch(struct rq *rq, struct task_struct *prev,
 #ifndef __ARCH_WANT_UNLOCKED_CTXSW
 	spin_release(&rq->lock.dep_map, 1, _THIS_IP_);
 #endif
+	//SWKIM
+//	if(ready_to_read)
+//		printk("KTHREAD trace prev:%d next:%d\n", prev->pid, next->pid);
 
 	/* Here we just switch the register state and the stack. */
 	switch_to(prev, next, prev);
