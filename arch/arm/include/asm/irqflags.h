@@ -24,7 +24,7 @@ static inline unsigned long arch_local_irq_save(void)
 static inline void arch_local_irq_enable(void)
 {
 	asm volatile(
-		"	cpsie i			@ arch_local_irq_enable"
+		"	cpsie i			@ arch_local_irq_enable"	
 		:
 		:
 		: "memory", "cc");

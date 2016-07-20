@@ -67,6 +67,7 @@ static inline void flush(void)
 #define MX50_UART1_BASE_ADDR	0x53fbc000
 #define MX53_UART1_BASE_ADDR	0x53fbc000
 #define MX6Q_UART4_BASE_ADDR    0x021f0000
+#define MX6Q_UART3_BASE_ADDR    0x021ec000	
 #define MX6Q_UART2_BASE_ADDR    0x021e8000
 #define MX6Q_UART1_BASE_ADDR    0x02020000
 
@@ -132,7 +133,7 @@ static __inline__ void __arch_decomp_setup(unsigned long arch_id)
 		uart_base = MX6Q_UART1_BASE_ADDR;
 		break;
 	case MACH_TYPE_MX6Q_SABREAUTO:
-		uart_base = MX6Q_UART4_BASE_ADDR;
+		uart_base = MX6Q_UART3_BASE_ADDR;		//HJPARK
 		break;
 	default:
 		break;

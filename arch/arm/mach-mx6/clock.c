@@ -65,8 +65,8 @@ static struct clk pll2_pfd_352M;
 static struct clk pll3_pfd_540M;
 static struct clk pll2_pfd_594M;
 static struct clk pll3_usb_otg_main_clk;
-static struct clk pll4_audio_main_clk;
-static struct clk pll5_video_main_clk;
+//HJPARKV static struct clk pll4_audio_main_clk;
+//HJPARKV static struct clk pll5_video_main_clk;
 static struct clk pll6_mlb150_main_clk;
 static struct clk pll7_usb_host_main_clk;
 static struct clk pll8_enet_main_clk;
@@ -207,8 +207,18 @@ static void __calc_pre_post_dividers(u32 max_podf, u32 div, u32 *pre, u32 *post)
 static int _clk_enable(struct clk *clk)
 {
 	u32 reg;
+	u32 usdhc3_reg;
 	reg = __raw_readl(clk->enable_reg);
-	reg |= MXC_CCM_CCGRx_CG_MASK << clk->enable_shift;
+/*HJPARK*/
+        if(clk->enable_reg == 0xf40c4080){
+                usdhc3_reg = reg;
+                usdhc3_reg &= 0xc0;
+                reg |= MXC_CCM_CCGRx_CG_MASK << clk->enable_shift;
+                reg |= usdhc3_reg;
+        }
+        else
+		reg |= MXC_CCM_CCGRx_CG_MASK << clk->enable_shift;
+
 	__raw_writel(reg, clk->enable_reg);
 
 	return 0;
@@ -217,8 +227,18 @@ static int _clk_enable(struct clk *clk)
 static void _clk_disable(struct clk *clk)
 {
 	u32 reg;
+	u32 usdhc3_reg;
 	reg = __raw_readl(clk->enable_reg);
-	reg &= ~(MXC_CCM_CCGRx_CG_MASK << clk->enable_shift);
+/*HJPARK*/
+        if(clk->enable_reg == 0xf40c4080){
+                usdhc3_reg = reg;
+                usdhc3_reg &= 0xc0;
+                reg &= ~(MXC_CCM_CCGRx_CG_MASK << clk->enable_shift);
+                reg |= usdhc3_reg;
+        }
+        else
+		reg &= ~(MXC_CCM_CCGRx_CG_MASK << clk->enable_shift);
+	
 	__raw_writel(reg, clk->enable_reg);
 }
 
@@ -260,10 +280,10 @@ static inline void __iomem *_get_pll_base(struct clk *pll)
 		return PLL2_528_BASE_ADDR;
 	else if (pll == &pll3_usb_otg_main_clk)
 		return PLL3_480_USB1_BASE_ADDR;
-	else if (pll == &pll4_audio_main_clk)
-		return PLL4_AUDIO_BASE_ADDR;
-	else if (pll == &pll5_video_main_clk)
-		return PLL5_VIDEO_BASE_ADDR;
+//HJPARKV	else if (pll == &pll4_audio_main_clk)
+//HJPARKV		return PLL4_AUDIO_BASE_ADDR;
+//HJPARKV	else if (pll == &pll5_video_main_clk)
+//HJPARKV		return PLL5_VIDEO_BASE_ADDR;
 	else if (pll == &pll6_mlb150_main_clk)
 		return PLL6_MLB_BASE_ADDR;
 	else if (pll == &pll7_usb_host_main_clk)
@@ -458,6 +478,8 @@ static void _clk_pfd_disable(struct clk *clk)
 		apbh_dma_clk.enable(&apbh_dma_clk);
 
 	/* set clk gate bit */
+/*kwlee*/
+	
 	__raw_writel((1 << (clk->enable_shift + 7)),
 			(int)clk->enable_reg + 4);
 
@@ -912,7 +934,7 @@ static struct clk pll3_60M = {
 	.parent = &pll3_sw_clk,
 	.get_rate = _clk_pll3_60M_get_rate,
 };
-
+/*HJPARKV
 static unsigned long  _clk_audio_video_get_rate(struct clk *clk)
 {
 	unsigned int div, mfn, mfd;
@@ -956,7 +978,8 @@ static unsigned long  _clk_audio_video_get_rate(struct clk *clk)
 
 	return rate;
 }
-
+*/
+/*HJPARKV
 static int _clk_audio_video_set_rate(struct clk *clk, unsigned long rate)
 {
 	unsigned int reg,  div;
@@ -988,6 +1011,7 @@ static int _clk_audio_video_set_rate(struct clk *clk, unsigned long rate)
 	if ((rev >= IMX_CHIP_REVISION_1_1) || cpu_is_mx6dl()) {
 		while (pre_div_rate < AUDIO_VIDEO_MIN_CLK_FREQ) {
 			pre_div_rate *= 2;
+*/
 			/*
 			 * test_div_sel field values:
 			 * 2 -> Divide by 1
@@ -999,6 +1023,7 @@ static int _clk_audio_video_set_rate(struct clk *clk, unsigned long rate)
 			 * 1 -> Divide by 2
 			 * 3 -> Divide by 4
 			 */
+/*HJPARKV
 			if (test_div_sel != 0)
 				test_div_sel--;
 			else {
@@ -1033,7 +1058,8 @@ static int _clk_audio_video_set_rate(struct clk *clk, unsigned long rate)
 
 	return 0;
 }
-
+*/
+/*HJPARKV
 static unsigned long _clk_audio_video_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -1087,7 +1113,8 @@ static unsigned long _clk_audio_video_round_rate(struct clk *clk,
 
 	return final_rate;
 }
-
+*/
+/*HJPARKV
 static int _clk_audio_video_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg;
@@ -1104,8 +1131,9 @@ static int _clk_audio_video_set_parent(struct clk *clk, struct clk *parent)
 				NULL, NULL, NULL);
 	reg |= mux << ANADIG_PLL_BYPASS_CLK_SRC_OFFSET;
 	__raw_writel(reg, pllbase);
-
+*/
 	/* Set anaclk_x as input */
+/*HJPARKV
 	if (parent == &anaclk_1) {
 		reg = __raw_readl(ANADIG_MISC1_REG);
 		reg |= (ANATOP_LVDS_CLK1_IBEN_MASK &
@@ -1120,7 +1148,8 @@ static int _clk_audio_video_set_parent(struct clk *clk, struct clk *parent)
 
 	return 0;
 }
-
+*/
+/*HJPARKV
 static struct clk pll4_audio_main_clk = {
 	__INIT_CLK_DEBUG(pll4_audio_main_clk)
 	.parent = &osc_clk,
@@ -1142,7 +1171,7 @@ static struct clk pll5_video_main_clk = {
 	.round_rate = _clk_audio_video_round_rate,
 	.set_parent = _clk_audio_video_set_parent,
 };
-
+*/
 static int _clk_pll_mlb_main_enable(struct clk *clk)
 {
 	unsigned int reg;
@@ -2617,7 +2646,7 @@ static struct clk usdhc4_clk = {
 	.set_rate = _clk_usdhc4_set_rate,
 	.get_rate = _clk_usdhc4_get_rate,
 };
-
+/*HJPARK
 static unsigned long _clk_ssi_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -2671,7 +2700,6 @@ static int _clk_ssi1_set_rate(struct clk *clk, unsigned long rate)
 	return 0;
 }
 
-
 static int _clk_ssi1_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -2706,7 +2734,8 @@ static struct clk ssi1_clk = {
 #endif
 	.flags  = AHB_AUDIO_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 };
-
+*/
+/*HJPARK
 static unsigned long _clk_ssi2_get_rate(struct clk *clk)
 {
 	u32 reg, prediv, podf;
@@ -2745,7 +2774,6 @@ static int _clk_ssi2_set_rate(struct clk *clk, unsigned long rate)
 	return 0;
 }
 
-
 static int _clk_ssi2_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -2780,7 +2808,8 @@ static struct clk ssi2_clk = {
 #endif
 	.flags  = AHB_AUDIO_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 };
-
+*/
+/*HJPARK
 static unsigned long _clk_ssi3_get_rate(struct clk *clk)
 {
 	u32 reg, prediv, podf;
@@ -2819,7 +2848,6 @@ static int _clk_ssi3_set_rate(struct clk *clk, unsigned long rate)
 	return 0;
 }
 
-
 static int _clk_ssi3_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -2853,7 +2881,8 @@ static struct clk ssi3_clk = {
 #endif
 	.flags  = AHB_AUDIO_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 };
-
+*/
+/*HJPARK
 static unsigned long _clk_ldb_di_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -2911,9 +2940,9 @@ static int _clk_ldb_di0_set_parent(struct clk *clk, struct clk *parent)
 	mux = _get_mux6(parent, &pll5_video_main_clk,
 		&pll2_pfd_352M, &pll2_pfd_400M,
 		(rev == IMX_CHIP_REVISION_1_0) ?
-		 &pll3_pfd_540M :	/* MX6Q TO1.0 */
-		 &mmdc_ch1_axi_clk[0],	/* MX6Q TO1.1 and MX6DL */
-		&pll3_usb_otg_main_clk, NULL);
+		 &pll3_pfd_540M :*/	/* MX6Q TO1.0 */
+/*HJPARK		 &mmdc_ch1_axi_clk[0],*/	/* MX6Q TO1.1 and MX6DL */
+/*HJPARK		&pll3_usb_otg_main_clk, NULL);
 	reg |= (mux << MXC_CCM_CS2CDR_LDB_DI0_CLK_SEL_OFFSET);
 
 	__raw_writel(reg, MXC_CCM_CS2CDR);
@@ -2935,7 +2964,8 @@ static struct clk ldb_di0_clk = {
 	.get_rate = _clk_ldb_di0_get_rate,
 	.flags = AHB_HIGH_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 };
-
+*/
+/*HJPARK
 static unsigned long _clk_ldb_di1_get_rate(struct clk *clk)
 {
 	u32 div;
@@ -2982,9 +3012,9 @@ static int _clk_ldb_di1_set_parent(struct clk *clk, struct clk *parent)
 	mux = _get_mux6(parent, &pll5_video_main_clk,
 		&pll2_pfd_352M, &pll2_pfd_400M,
 		(rev == IMX_CHIP_REVISION_1_0) ?
-		 &pll3_pfd_540M :	/* MX6Q TO1.0 */
-		 &mmdc_ch1_axi_clk[0],	/* MX6Q TO1.1 and MX6DL */
-		&pll3_usb_otg_main_clk, NULL);
+		 &pll3_pfd_540M :*/	/* MX6Q TO1.0 */
+/*HJPARK		 &mmdc_ch1_axi_clk[0],*/	/* MX6Q TO1.1 and MX6DL */
+/*HJPARK		&pll3_usb_otg_main_clk, NULL);
 	reg |= (mux << MXC_CCM_CS2CDR_LDB_DI1_CLK_SEL_OFFSET);
 
 	__raw_writel(reg, MXC_CCM_CS2CDR);
@@ -3006,8 +3036,8 @@ static struct clk ldb_di1_clk = {
 	.get_rate = _clk_ldb_di1_get_rate,
 	.flags = AHB_HIGH_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 };
-
-
+*/
+/*HJPARK
 static unsigned long _clk_ipu_di_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -3019,13 +3049,15 @@ static unsigned long _clk_ipu_di_round_rate(struct clk *clk,
 		return parent_rate;
 
 	div = parent_rate / rate;
+*/
 	/* Round to closest divisor */
-	if ((parent_rate % rate) > (rate / 2))
-		div++;
+//HJPARK	if ((parent_rate % rate) > (rate / 2))
+//HJPARK		div++;
 
 	/* Make sure rate is not greater than the maximum value for the clock.
 	 * Also prevent a div of 0.
 	 */
+/*HJPARK
 	if (div == 0)
 		div++;
 
@@ -3034,7 +3066,8 @@ static unsigned long _clk_ipu_di_round_rate(struct clk *clk,
 
 	return parent_rate / div;
 }
-
+*/
+/*HJPARK
 static unsigned long _clk_ipu1_di0_get_rate(struct clk *clk)
 {
 	u32 reg, div;
@@ -3050,7 +3083,8 @@ static unsigned long _clk_ipu1_di0_get_rate(struct clk *clk)
 
 	return clk_get_rate(clk->parent) / div;
 }
-
+*/
+/*HJPARK
 static int _clk_ipu1_di0_set_rate(struct clk *clk, unsigned long rate)
 {
 	u32 reg, div;
@@ -3077,8 +3111,8 @@ static int _clk_ipu1_di0_set_rate(struct clk *clk, unsigned long rate)
 
 	return 0;
 }
-
-
+*/
+/*HJPARK
 static int _clk_ipu1_di0_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -3097,9 +3131,9 @@ static int _clk_ipu1_di0_set_parent(struct clk *clk, struct clk *parent)
 		reg |= (mux << MXC_CCM_CHSCCDR_IPU1_DI0_PRE_CLK_SEL_OFFSET);
 
 		__raw_writel(reg, MXC_CCM_CHSCCDR);
-
+*/
 		/* Derive clock from divided pre-muxed ipu1_di0 clock.*/
-		mux = 0;
+/*HJPARK		mux = 0;
 	}
 
 	reg = __raw_readl(MXC_CCM_CHSCCDR)
@@ -3109,7 +3143,8 @@ static int _clk_ipu1_di0_set_parent(struct clk *clk, struct clk *parent)
 
 	return 0;
 }
-
+*/
+/*HJPARK
 static unsigned long _clk_ipu1_di1_get_rate(struct clk *clk)
 {
 	u32 reg, div;
@@ -3125,7 +3160,8 @@ static unsigned long _clk_ipu1_di1_get_rate(struct clk *clk)
 
 	return clk_get_rate(clk->parent) / div;
 }
-
+*/
+/*HJPARK
 static int _clk_ipu1_di1_set_rate(struct clk *clk, unsigned long rate)
 {
 	u32 reg, div;
@@ -3152,8 +3188,8 @@ static int _clk_ipu1_di1_set_rate(struct clk *clk, unsigned long rate)
 
 	return 0;
 }
-
-
+*/
+/*HJPARK
 static int _clk_ipu1_di1_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -3172,9 +3208,9 @@ static int _clk_ipu1_di1_set_parent(struct clk *clk, struct clk *parent)
 		reg |= (mux << MXC_CCM_CHSCCDR_IPU1_DI1_PRE_CLK_SEL_OFFSET);
 
 		__raw_writel(reg, MXC_CCM_CHSCCDR);
-
+*/
 		/* Derive clock from divided pre-muxed ipu1_di0 clock.*/
-		mux = 0;
+/*HJPARK		mux = 0;
 	}
 	reg = __raw_readl(MXC_CCM_CHSCCDR)
 		& ~MXC_CCM_CHSCCDR_IPU1_DI1_CLK_SEL_MASK;
@@ -3183,7 +3219,8 @@ static int _clk_ipu1_di1_set_parent(struct clk *clk, struct clk *parent)
 
 	return 0;
 }
-
+*/
+/*HJPARK
 static struct clk ipu1_di_clk[] = {
 	{
 	 __INIT_CLK_DEBUG(ipu1_di_clk_0)
@@ -3214,7 +3251,8 @@ static struct clk ipu1_di_clk[] = {
 	.flags = AHB_HIGH_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 	},
 };
-
+*/
+/*HJPARK
 static unsigned long _clk_ipu2_di0_get_rate(struct clk *clk)
 {
 	u32 reg, div;
@@ -3230,7 +3268,8 @@ static unsigned long _clk_ipu2_di0_get_rate(struct clk *clk)
 
 	return clk_get_rate(clk->parent) / div;
 }
-
+*/
+/*HJPARK
 static int _clk_ipu2_di0_set_rate(struct clk *clk, unsigned long rate)
 {
 	u32 reg, div;
@@ -3257,7 +3296,8 @@ static int _clk_ipu2_di0_set_rate(struct clk *clk, unsigned long rate)
 
 	return 0;
 }
-
+*/
+/*HJPARK
 static int _clk_ipu2_di0_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -3276,9 +3316,9 @@ static int _clk_ipu2_di0_set_parent(struct clk *clk, struct clk *parent)
 		reg |= (mux << MXC_CCM_CSCDR2_IPU2_DI0_PRE_CLK_SEL_OFFSET);
 
 		__raw_writel(reg, MXC_CCM_CSCDR2);
-
+*/
 		/* Derive clock from divided pre-muxed ipu2_di0 clock.*/
-		mux = 0;
+/*HJPARK		mux = 0;
 	}
 	reg = __raw_readl(MXC_CCM_CSCDR2)
 		& ~MXC_CCM_CSCDR2_IPU2_DI0_CLK_SEL_MASK;
@@ -3287,7 +3327,8 @@ static int _clk_ipu2_di0_set_parent(struct clk *clk, struct clk *parent)
 
 	return 0;
 }
-
+*/
+/*HJPARK
 static unsigned long _clk_ipu2_di1_get_rate(struct clk *clk)
 {
 	u32 reg, div;
@@ -3303,7 +3344,8 @@ static unsigned long _clk_ipu2_di1_get_rate(struct clk *clk)
 
 	return clk_get_rate(clk->parent) / div;
 }
-
+*/
+/*HJPARK
 static int _clk_ipu2_di1_set_rate(struct clk *clk, unsigned long rate)
 {
 	u32 reg, div;
@@ -3349,9 +3391,9 @@ static int _clk_ipu2_di1_set_parent(struct clk *clk, struct clk *parent)
 		reg |= (mux << MXC_CCM_CSCDR2_IPU2_DI1_PRE_CLK_SEL_OFFSET);
 
 		__raw_writel(reg, MXC_CCM_CSCDR2);
-
+*/
 		/* Derive clock from divided pre-muxed ipu1_di0 clock.*/
-		mux = 0;
+/*HJPARK		mux = 0;
 	}
 	reg = __raw_readl(MXC_CCM_CSCDR2)
 		& ~MXC_CCM_CSCDR2_IPU2_DI1_CLK_SEL_MASK;
@@ -3391,7 +3433,7 @@ static struct clk ipu2_di_clk[] = {
 	.flags = AHB_HIGH_SET_POINT | CPU_FREQ_TRIG_UPDATE,
 	},
 };
-
+*/
 static unsigned long _clk_can_root_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -3497,7 +3539,7 @@ static struct clk can1_clk[] = {
 	.disable = _clk_disable,
 	},
 };
-
+/*HJPARK
 static unsigned long _clk_spdif_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -3591,7 +3633,8 @@ static struct clk spdif0_clk[] = {
 	 .secondary = &spba_clk,
 	 },
 };
-
+*/
+/*HJPARK
 static unsigned long _clk_esai_round_rate(struct clk *clk,
 						unsigned long rate)
 {
@@ -3674,7 +3717,7 @@ static struct clk esai_clk = {
 	 .set_parent = _clk_esai_set_parent,
 	 .round_rate = _clk_esai_round_rate,
 };
-
+*/
 static int _clk_enet_set_rate(struct clk *clk, unsigned long rate)
 {
 	unsigned int reg, div = 1;
@@ -4273,7 +4316,7 @@ static struct clk caam_clk[] = {
 	.secondary = &mx6per1_clk,
 	},
 };
-
+/*HJPARK
 static int _clk_asrc_serial_set_parent(struct clk *clk, struct clk *parent)
 {
 	u32 reg, mux;
@@ -4354,10 +4397,12 @@ static struct clk asrc_clk[] = {
 	.secondary = &spba_clk,
 	},
 	{
+*/
 	/*In the MX6 spec, asrc_serial_clk is listed as SPDIF1 clk
 	 * This clock can never be gated and does  not have any
 	 * CCGR bits associated with it.
 	 */
+/*HJPARK
 	__INIT_CLK_DEBUG(asrc_serial_clk)
 	.id = 1,
 	.parent = &pll3_sw_clk,
@@ -4367,7 +4412,7 @@ static struct clk asrc_clk[] = {
 	 .round_rate = _clk_asrc_serial_round_rate,
 	},
 };
-
+*/
 static struct clk apbh_dma_clk = {
 	__INIT_CLK_DEBUG(apbh_dma_clk)
 	.parent = &usdhc3_clk,
@@ -4946,20 +4991,20 @@ static int _clk_clko_set_parent(struct clk *clk, struct clk *parent)
 		sel = 1;
 	else if (parent == &pll1_sys_main_clk)
 		sel = 2;
-	else if (parent == &pll5_video_main_clk)
-		sel = 3;
+//HJPARK	else if (parent == &pll5_video_main_clk)
+//HJPARK		sel = 3;
 	else if (parent == &axi_clk)
 		sel = 5;
 	else if (parent == &enfc_clk)
 		sel = 6;
-	else if (parent == &ipu1_di_clk[0])
-		sel = 7;
-	else if (parent == &ipu1_di_clk[1])
-		sel = 8;
-	else if (parent == &ipu2_di_clk[0])
-		sel = 9;
-	else if (parent == &ipu2_di_clk[1])
-		sel = 10;
+//HJPARK	else if (parent == &ipu1_di_clk[0])
+//HJPARK		sel = 7;
+//HJPARK	else if (parent == &ipu1_di_clk[1])
+//HJPARK		sel = 8;
+//HJPARK	else if (parent == &ipu2_di_clk[0])
+//HJPARK		sel = 9;
+//HJPARK	else if (parent == &ipu2_di_clk[1])
+//HJPARK		sel = 10;
 	else if (parent == &ahb_clk)
 		sel = 11;
 	else if (parent == &ipg_clk)
@@ -4968,8 +5013,8 @@ static int _clk_clko_set_parent(struct clk *clk, struct clk *parent)
 		sel = 13;
 	else if (parent == &ckil_clk)
 		sel = 14;
-	else if (parent == &pll4_audio_main_clk)
-		sel = 15;
+//HJPARK	else if (parent == &pll4_audio_main_clk)
+//HJPARK		sel = 15;
 	else if (parent == &clko2_clk) {
 		reg = __raw_readl(MXC_CCM_CCOSR);
 		reg |= MXC_CCM_CCOSR_CKOL_MIRROR_CKO2_MASK;
@@ -5080,26 +5125,26 @@ static int _clk_clko2_set_parent(struct clk *clk, struct clk *parent)
 		sel = 16;
 	else if (parent == &usdhc2_clk)
 		sel = 17;
-	else if (parent == &ssi1_clk)
-		sel = 18;
-	else if (parent == &ssi2_clk)
-		sel = 19;
-	else if (parent == &ssi3_clk)
-		sel = 20;
+//HJPARK	else if (parent == &ssi1_clk)
+//HJPARK		sel = 18;
+//HJPARK	else if (parent == &ssi2_clk)
+//HJPARK		sel = 19;
+//HJPARK	else if (parent == &ssi3_clk)
+//HJPARK		sel = 20;
 	else if (parent == &gpu3d_shader_clk)
 		sel = 21;
 	else if (parent == &can_clk_root)
 		sel = 23;
-	else if (parent == &ldb_di0_clk)
-		sel = 24;
-	else if (parent == &ldb_di1_clk)
-		sel = 25;
-	else if (parent == &esai_clk)
-		sel = 26;
+//HJPARK	else if (parent == &ldb_di0_clk)
+//HJPARK		sel = 24;
+//HJPARK	else if (parent == &ldb_di1_clk)
+//HJPARK		sel = 25;
+//HJPARK	else if (parent == &esai_clk)
+//HJPARK		sel = 26;
 	else if (parent == &uart_clk[0])
 		sel = 28;
-	else if (parent == &spdif0_clk[0])
-		sel = 29;
+//HJPARK	else if (parent == &spdif0_clk[0])
+//HJPARK		sel = 29;
 	else if (parent == &hsi_tx_clk[0])
 		sel = 31;
 	else
@@ -5224,8 +5269,8 @@ static struct clk_lookup lookups[] = {
 	_REGISTER_CLOCK(NULL, "pll3_120M", pll3_120M),
 	_REGISTER_CLOCK(NULL, "pll3_120M", pll3_80M),
 	_REGISTER_CLOCK(NULL, "pll3_120M", pll3_60M),
-	_REGISTER_CLOCK(NULL, "pll4", pll4_audio_main_clk),
-	_REGISTER_CLOCK(NULL, "pll5", pll5_video_main_clk),
+//HJPARK	_REGISTER_CLOCK(NULL, "pll4", pll4_audio_main_clk),
+//HJPARK	_REGISTER_CLOCK(NULL, "pll5", pll5_video_main_clk),
 	_REGISTER_CLOCK(NULL, "pll6", pll6_mlb150_main_clk),
 	_REGISTER_CLOCK(NULL, "pll3", pll7_usb_host_main_clk),
 	_REGISTER_CLOCK(NULL, "pll4", pll8_enet_main_clk),
@@ -5255,20 +5300,20 @@ static struct clk_lookup lookups[] = {
 	_REGISTER_CLOCK("sdhci-esdhc-imx.1", NULL, usdhc2_clk),
 	_REGISTER_CLOCK("sdhci-esdhc-imx.2", NULL, usdhc3_clk),
 	_REGISTER_CLOCK("sdhci-esdhc-imx.3", NULL, usdhc4_clk),
-	_REGISTER_CLOCK("imx-ssi.0", NULL, ssi1_clk),
-	_REGISTER_CLOCK("imx-ssi.1", NULL, ssi2_clk),
-	_REGISTER_CLOCK("imx-ssi.2", NULL, ssi3_clk),
-	_REGISTER_CLOCK(NULL, "ipu1_di0_clk", ipu1_di_clk[0]),
-	_REGISTER_CLOCK(NULL, "ipu1_di1_clk", ipu1_di_clk[1]),
-	_REGISTER_CLOCK(NULL, "ipu2_di0_clk", ipu2_di_clk[0]),
-	_REGISTER_CLOCK(NULL, "ipu2_di1_clk", ipu2_di_clk[1]),
+//HJPARK	_REGISTER_CLOCK("imx-ssi.0", NULL, ssi1_clk),
+//HJPARK	_REGISTER_CLOCK("imx-ssi.1", NULL, ssi2_clk),
+//HJPARK	_REGISTER_CLOCK("imx-ssi.2", NULL, ssi3_clk),
+//HJPARK	_REGISTER_CLOCK(NULL, "ipu1_di0_clk", ipu1_di_clk[0]),
+//HJPARK	_REGISTER_CLOCK(NULL, "ipu1_di1_clk", ipu1_di_clk[1]),
+//HJPARK	_REGISTER_CLOCK(NULL, "ipu2_di0_clk", ipu2_di_clk[0]),
+//HJPARK	_REGISTER_CLOCK(NULL, "ipu2_di1_clk", ipu2_di_clk[1]),
 	_REGISTER_CLOCK(NULL, "can_root_clk", can_clk_root),
 	_REGISTER_CLOCK("imx6q-flexcan.0", NULL, can1_clk[0]),
 	_REGISTER_CLOCK("imx6q-flexcan.1", NULL, can2_clk[0]),
-	_REGISTER_CLOCK(NULL, "ldb_di0_clk", ldb_di0_clk),
-	_REGISTER_CLOCK(NULL, "ldb_di1_clk", ldb_di1_clk),
-	_REGISTER_CLOCK("mxc_spdif.0", NULL, spdif0_clk[0]),
-	_REGISTER_CLOCK(NULL, "esai_clk", esai_clk),
+//HJPARK	_REGISTER_CLOCK(NULL, "ldb_di0_clk", ldb_di0_clk),
+//HJPARK	_REGISTER_CLOCK(NULL, "ldb_di1_clk", ldb_di1_clk),
+//HJPARK	_REGISTER_CLOCK("mxc_spdif.0", NULL, spdif0_clk[0]),
+//HJPARK	_REGISTER_CLOCK(NULL, "esai_clk", esai_clk),
 	_REGISTER_CLOCK("imx6q-ecspi.0", NULL, ecspi_clk[0]),
 	_REGISTER_CLOCK("imx6q-ecspi.1", NULL, ecspi_clk[1]),
 	_REGISTER_CLOCK("imx6q-ecspi.2", NULL, ecspi_clk[2]),
@@ -5284,8 +5329,8 @@ static struct clk_lookup lookups[] = {
 	_REGISTER_CLOCK("imx-uart.4", NULL, uart_clk[0]),
 	_REGISTER_CLOCK(NULL, "hsi_tx", hsi_tx_clk[0]),
 	_REGISTER_CLOCK(NULL, "caam_clk", caam_clk[0]),
-	_REGISTER_CLOCK(NULL, "asrc_clk", asrc_clk[0]),
-	_REGISTER_CLOCK(NULL, "asrc_serial_clk", asrc_clk[1]),
+//HJPARK	_REGISTER_CLOCK(NULL, "asrc_clk", asrc_clk[0]),
+//HJPARK	_REGISTER_CLOCK(NULL, "asrc_serial_clk", asrc_clk[1]),
 	_REGISTER_CLOCK(NULL, "mxs-dma-apbh", apbh_dma_clk),
 	_REGISTER_CLOCK(NULL, "openvg_axi_clk", openvg_axi_clk),
 	_REGISTER_CLOCK(NULL, "gpu3d_clk", gpu3d_core_clk[0]),
@@ -5320,7 +5365,7 @@ static struct clk_lookup lookups[] = {
 	_REGISTER_CLOCK(NULL, "clko2_clk", clko2_clk),
 	_REGISTER_CLOCK(NULL, "pxp_axi", ipu2_clk),
 	_REGISTER_CLOCK(NULL, "epdc_axi", ipu2_clk),
-	_REGISTER_CLOCK(NULL, "epdc_pix", ipu2_di_clk[1]),
+//HJPARK	_REGISTER_CLOCK(NULL, "epdc_pix", ipu2_di_clk[1]),
 	_REGISTER_CLOCK("mxs-perfmon.0", "perfmon", perfmon0_clk),
 	_REGISTER_CLOCK("mxs-perfmon.1", "perfmon", perfmon1_clk),
 	_REGISTER_CLOCK("mxs-perfmon.2", "perfmon", perfmon2_clk),
@@ -5351,6 +5396,7 @@ int __init mx6_clocks_init(unsigned long ckil, unsigned long osc,
 	__iomem void *base;
 	int i, reg;
 	u32 parent_rate, rate;
+	u32 usdhc3_val;			//HJPARK
 	unsigned long ipg_clk_rate, max_arm_wait_clk;
 
 	external_low_reference = ckil;
@@ -5402,6 +5448,7 @@ int __init mx6_clocks_init(unsigned long ckil, unsigned long osc,
 	clk_enable(&cpu_clk);
 	clk_enable(&periph_clk);
 	/* Disable un-necessary PFDs & PLLs */
+/*HJPARK
 	if (pll2_pfd_400M.usecount == 0 && cpu_is_mx6q())
 		pll2_pfd_400M.disable(&pll2_pfd_400M);
 	pll2_pfd_352M.disable(&pll2_pfd_352M);
@@ -5423,16 +5470,17 @@ int __init mx6_clocks_init(unsigned long ckil, unsigned long osc,
 
 	sata_clk[0].disable(&sata_clk[0]);
 	pcie_clk[0].disable(&pcie_clk[0]);
-
+*/
 	/* Initialize Audio and Video PLLs to valid frequency. */
-	clk_set_rate(&pll4_audio_main_clk, 176000000);
-	clk_set_rate(&pll5_video_main_clk, 650000000);
+//HJPARK	clk_set_rate(&pll4_audio_main_clk, 176000000);
+//HJPARK	clk_set_rate(&pll5_video_main_clk, 650000000);
 
+/*HJPARK
 	clk_set_parent(&ipu1_di_clk[0], &pll5_video_main_clk);
 	clk_set_parent(&ipu1_di_clk[1], &pll5_video_main_clk);
 	clk_set_parent(&ipu2_di_clk[0], &pll5_video_main_clk);
 	clk_set_parent(&ipu2_di_clk[1], &pll5_video_main_clk);
-
+*/
 	clk_set_parent(&emi_clk, &pll2_pfd_400M);
 	clk_set_rate(&emi_clk, 200000000);
 
@@ -5477,21 +5525,21 @@ int __init mx6_clocks_init(unsigned long ckil, unsigned long osc,
 	if (cpu_is_mx6q() && (mx6q_revision() > IMX_CHIP_REVISION_1_1))
 		clk_set_parent(&gpu2d_core_clk[0], &pll3_usb_otg_main_clk);
 
-	clk_set_parent(&ldb_di0_clk, &pll2_pfd_352M);
-	clk_set_parent(&ldb_di1_clk, &pll2_pfd_352M);
+//HJPARK	clk_set_parent(&ldb_di0_clk, &pll2_pfd_352M);
+//HJPARK	clk_set_parent(&ldb_di1_clk, &pll2_pfd_352M);
 
 	/* PCLK camera - J5 */
 	clk_set_parent(&clko2_clk, &osc_clk);
 	clk_set_rate(&clko2_clk, 2400000);
 
-	clk_set_parent(&clko_clk, &pll4_audio_main_clk);
+//HJPARK	clk_set_parent(&clko_clk, &pll4_audio_main_clk);
 	/*
 	 * FIXME: asrc needs to use asrc_serial(spdif1) clock to do sample
 	 * rate convertion and this clock frequency can not be too high, set
 	 * it to the minimum value 7.5Mhz to make asrc work properly.
 	 */
-	clk_set_parent(&asrc_clk[1], &pll3_sw_clk);
-	clk_set_rate(&asrc_clk[1], 7500000);
+//HJPARK	clk_set_parent(&asrc_clk[1], &pll3_sw_clk);
+//HJPARK	clk_set_rate(&asrc_clk[1], 7500000);
 
 	/* set the GPMI clock to default frequency : 20MHz */
 	clk_set_parent(&enfc_clk, &pll2_pfd_400M);
@@ -5526,16 +5574,21 @@ int __init mx6_clocks_init(unsigned long ckil, unsigned long osc,
 		     1 << MXC_CCM_CCGRx_CG13_OFFSET |
 		     3 << MXC_CCM_CCGRx_CG12_OFFSET |
 		     1 << MXC_CCM_CCGRx_CG11_OFFSET |
-		     3 << MXC_CCM_CCGRx_CG10_OFFSET, MXC_CCM_CCGR3);
+		     3 << MXC_CCM_CCGRx_CG10_OFFSET |
+		     3 << MXC_CCM_CCGRx_CG1_OFFSET  |
+		     3 << MXC_CCM_CCGRx_CG0_OFFSET, MXC_CCM_CCGR3);		//HJPARK
 	__raw_writel(3 << MXC_CCM_CCGRx_CG7_OFFSET |
 			1 << MXC_CCM_CCGRx_CG6_OFFSET |
 			1 << MXC_CCM_CCGRx_CG4_OFFSET, MXC_CCM_CCGR4);
 	__raw_writel(1 << MXC_CCM_CCGRx_CG0_OFFSET, MXC_CCM_CCGR5);
 
-	__raw_writel(0, MXC_CCM_CCGR6);
+//HJPARK	__raw_writel(0, MXC_CCM_CCGR6);
+        usdhc3_val = __raw_readl(MXC_CCM_CCGR6);                //HJPARK
+        usdhc3_val = usdhc3_val & 0xc0;                 //HJPARK
+        __raw_writel(0 | usdhc3_val, MXC_CCM_CCGR6);
 
 	/* S/PDIF */
-	clk_set_parent(&spdif0_clk[0], &pll3_pfd_454M);
+//HJPARK	clk_set_parent(&spdif0_clk[0], &pll3_pfd_454M);
 
 	/* MLB150 SYS Clock */
 	/*
@@ -5556,10 +5609,10 @@ int __init mx6_clocks_init(unsigned long ckil, unsigned long osc,
 		/* pxp & epdc */
 		clk_set_parent(&ipu2_clk, &pll2_pfd_400M);
 		clk_set_rate(&ipu2_clk, 200000000);
-		if (epdc_enabled)
-			clk_set_parent(&ipu2_di_clk[1], &pll5_video_main_clk);
-		else
-			clk_set_parent(&ipu2_di_clk[1], &pll3_pfd_540M);
+//HJPARK		if (epdc_enabled)
+//HJPARK			clk_set_parent(&ipu2_di_clk[1], &pll5_video_main_clk);
+//HJPARK		else
+//HJPARK			clk_set_parent(&ipu2_di_clk[1], &pll3_pfd_540M);
 	}
 
 	lp_high_freq = 0;

@@ -14,7 +14,6 @@
  * some kernel statistics (CPU usage, context switches ...),
  * used by rstatd/perfmeter
  */
-
 struct cpu_usage_stat {
 	cputime64_t user;
 	cputime64_t nice;

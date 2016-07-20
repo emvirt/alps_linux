@@ -49,4 +49,4 @@ static int __init init_mmap_min_addr(void)
 
 	return 0;
 }
-pure_initcall(init_mmap_min_addr);
+//kwlee pure_initcall(init_mmap_min_addr);

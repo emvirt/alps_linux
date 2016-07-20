@@ -59,9 +59,8 @@ static void sdhci_clk_worker(struct work_struct *work)
 {
 	struct sdhci_host *host =
 		container_of(work, struct sdhci_host, clk_worker.work);
-
-	if (host->ops->platform_clk_ctrl && host->clk_status)
-		host->ops->platform_clk_ctrl(host, false);
+//HJPARK	if (host->ops->platform_clk_ctrl && host->clk_status)
+//HJPARK		host->ops->platform_clk_ctrl(host, false);
 }
 
 static inline bool sdhci_is_sdio_attached(struct sdhci_host *host)
@@ -86,8 +85,8 @@ static void sdhci_disable_clk(struct sdhci_host *host, int delay)
 {
 	if (host->clk_mgr_en) {
 		if (delay == 0 && !in_interrupt()) {
-			if (host->ops->platform_clk_ctrl && host->clk_status)
-				host->ops->platform_clk_ctrl(host, false);
+//HJPARK			if (host->ops->platform_clk_ctrl && host->clk_status)
+//HJPARK				host->ops->platform_clk_ctrl(host, false);
 		} else
 			schedule_delayed_work(&host->clk_worker, delay);
 	}
@@ -974,6 +973,7 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 {
 	int flags;
 	u32 mask;
+	u32 usdhc_state;
 	unsigned long timeout;
 
 	WARN_ON(host->cmd);
@@ -1040,6 +1040,11 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 		flags |= SDHCI_CMD_DATA;
 
 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
+/*
+	usdhc_state = readl(0xc0960024);
+	if(usdhc_state!=0xff888088)
+		printk("============%d============\n",usdhc_state);	//HJPARK
+*/
 }
 
 static void sdhci_finish_command(struct sdhci_host *host)
@@ -2921,8 +2926,8 @@ int sdhci_add_host(struct sdhci_host *host)
 
 	mmc_add_host(mmc);
 
-	printk(KERN_INFO "%s: SDHCI controller on %s [%s] using %s\n",
-		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)),
+	printk(KERN_INFO "%s: SDHCI controller on %s [%s] using %s \n",
+		mmc_hostname(mmc), host->hw_name, dev_name(mmc_dev(mmc)), 
 		(host->flags & SDHCI_USE_ADMA) ? "ADMA" :
 		(host->flags & SDHCI_USE_SDMA) ? "DMA" : "PIO");
 

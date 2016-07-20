@@ -65,15 +65,19 @@ int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
 	unsigned long boot_entry;
 	void __iomem *src_base = IO_ADDRESS(SRC_BASE_ADDR);
 	unsigned int val;
-
+return 0;
 	 /*
 	  * set synchronisation state between this boot processor
 	  * and the secondary one
 	  */
 	spin_lock(&boot_lock);
 
+        asm volatile("mov r0, #8\n");
+        asm volatile(".word 0xE1600070\n");
+
 	/* set entry point for cpu1-cpu3*/
-	boot_entry = virt_to_phys(mx6_secondary_startup);
+//hjpark	boot_entry = virt_to_phys(mx6_secondary_startup);
+/*hjpark	boot_entry = 0x7ff11260;	//hjpark SafeGSecondaryBoot
 
 	writel(boot_entry, src_base + SRC_GPR1_OFFSET + 4 * 2 * cpu);
 	writel(0, src_base + SRC_GPR1_OFFSET + 4 * 2 * cpu + 4);
@@ -81,13 +85,13 @@ int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
 	smp_wmb();
 	dsb();
 	flush_cache_all();
-
+*/
 	/* reset cpu<n> */
-	val = readl(src_base + SRC_SCR_OFFSET);
+/*hjpark	val = readl(src_base + SRC_SCR_OFFSET);
 	val |= 1 << (BP_SRC_SCR_CORE0_RST + cpu);
 	val |= 1 << (BP_SRC_SCR_CORES_DBG_RST + cpu);
 	writel(val, src_base + SRC_SCR_OFFSET);
-
+*/
 	/*
 	* now the secondary core is starting up let it run its
 	* calibrations, then wait for it to finish

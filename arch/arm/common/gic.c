@@ -186,7 +186,7 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 		return -EINVAL;
 
 	mask = 0xff << shift;
-	bit = 1 << (cpu + shift);
+	bit = 15 << (cpu + shift);	//HJPARK
 
 	spin_lock(&irq_controller_lock);
 	val = readl_relaxed(reg) & ~mask;
@@ -292,7 +292,8 @@ static void __init gic_dist_init(struct gic_chip_data *gic,
 	 * Set all global interrupts to this CPU only.
 	 */
 	for (i = 32; i < gic_irqs; i += 4)
-		writel_relaxed(cpumask, base + GIC_DIST_TARGET + i * 4 / 4);
+//HJPARK		writel_relaxed(cpumask, base + GIC_DIST_TARGET + i * 4 / 4);
+		writel_relaxed(0X0f0f0f0f, base + GIC_DIST_TARGET + i * 4 / 4);
 
 	/*
 	 * Set priority on all global interrupts.
@@ -326,6 +327,10 @@ static void __init gic_dist_init(struct gic_chip_data *gic,
 	writel_relaxed(1, base + GIC_DIST_CTRL);
 }
 
+//YSB
+#define CP15_VBAR_WRITE(x) \
+    __asm__ volatile ("mcr p15, 0, %0, c12, c0, 0"::"r"(x))
+
 static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 {
 	void __iomem *dist_base = gic->dist_base;
@@ -346,7 +351,9 @@ static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 		writel_relaxed(0xa0a0a0a0, dist_base + GIC_DIST_PRI + i * 4 / 4);
 
 	writel_relaxed(0xf0, base + GIC_CPU_PRIMASK);
-	writel_relaxed(1, base + GIC_CPU_CTRL);
+	CP15_VBAR_WRITE(0xFFFF0000);
+//hjpark	writel_relaxed(1, base + GIC_CPU_CTRL);
+	
 }
 
 void gic_init(unsigned int gic_nr, unsigned int irq_start,

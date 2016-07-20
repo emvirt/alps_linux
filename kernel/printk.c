@@ -1595,7 +1595,7 @@ static int __init printk_late_init(void)
 	hotcpu_notifier(console_cpu_notify, 0);
 	return 0;
 }
-late_initcall(printk_late_init);
+//kwlee late_initcall(printk_late_init);
 
 #if defined CONFIG_PRINTK
 

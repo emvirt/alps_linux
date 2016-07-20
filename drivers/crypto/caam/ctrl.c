@@ -641,7 +641,7 @@ static void __exit caam_base_exit(void)
 #endif
 }
 
-module_init(caam_base_init);
+//kwlee module_init(caam_base_init);
 module_exit(caam_base_exit);
 
 MODULE_LICENSE("GPL");

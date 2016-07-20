@@ -687,7 +687,7 @@ init_hw_perf_events(void)
 
 	return 0;
 }
-early_initcall(init_hw_perf_events);
+//kwlee early_initcall(init_hw_perf_events);
 
 /*
  * Callchain handling code.

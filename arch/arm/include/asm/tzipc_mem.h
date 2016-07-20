@@ -1,0 +1,34 @@
+#ifndef __ARCH_TZIPC_MEM_H
+
+#define __ARCH_TZIPC_MEM_H
+
+/* Additional buffer for large data */
+#define TZIPC_PHYS_LDATA_BUF_ADDR 0x7fe00000U
+#define TZIPC_LDATA_BUF_SIZE 0x100000U		// 1MB //0x4000U	// 16KB
+
+#define TZIPC_MEM_SIZE_FOR_LDATA 0x100000U
+
+/* TZIPC shared buffer */
+#define TZIPC_PHYS_MEM_ADDR 0x7fb00000U //0x7fbff000U
+
+#define TZIPC_PHYS_SECURE_HDR_ADDR 0x7fb00000U // 0x7fbff000U
+#define TZIPC_PHYS_NORMAL_HDR_ADDR 0x7fb00020U // 0x7fbff020U
+
+#define TZIPC_PHYS_SECURE_BUF_ADDR 0x7fc00000U
+#define TZIPC_PHYS_NORMAL_BUF_ADDR 0x7fd00000U
+
+#define TZIPC_BUF_SIZE 0x100000U // 1MB = 1024 * 1024
+#define TZIPC_HDR_SIZE 0x20U
+
+#define TZIPC_MEM_SIZE_FOR_HDR 0x100000U // 0x1000U
+
+#define TZIPC_TOTAL_MEM_SIZE \
+	(TZIPC_MEM_SIZE_FOR_HDR \
+	+ (TZIPC_BUF_SIZE * 2) \
+	+ TZIPC_MEM_SIZE_FOR_LDATA)
+
+/* Translate addresses */
+#define TZIPC_P2V_OFFSET 0x72000000U
+#define tzipc_phys_to_virt(phys) ((phys) + TZIPC_P2V_OFFSET)
+
+#endif

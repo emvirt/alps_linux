@@ -2073,7 +2073,7 @@ static __init int asrc_init(void)
 	return;
 }
 
-module_init(asrc_init);
+//HJPARK module_init(asrc_init);
 module_exit(asrc_exit);
 MODULE_AUTHOR("Freescale Semiconductor, Inc.");
 MODULE_DESCRIPTION("Asynchronous Sample Rate Converter");

@@ -28,6 +28,7 @@
 #include <linux/uaccess.h>
 #include <linux/slab.h>
 
+extern int smc_permission;
 /* Fork a new task - this creates a new program thread.
  * This is called indirectly via a small wrapper
  */
@@ -92,7 +93,8 @@ int kernel_execve(const char *filename,
 			(const char __user *const __user *)envp, &regs);
 	if (ret < 0)
 		goto out;
-
+	//kwlee
+	smc_permission = 1;
 	/*
 	 * Save argc to the register structure for userspace.
 	 */

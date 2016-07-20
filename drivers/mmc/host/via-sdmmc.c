@@ -940,7 +940,7 @@ static void via_sdc_timeout(unsigned long ulongdata)
 	spin_lock_irqsave(&sdhost->lock, flags);
 
 	if (sdhost->mrq) {
-		pr_err("%s: Timeout waiting for hardware interrupt."
+		pr_err("%s: Normal via Timeout waiting for hardware interrupt."
 		       "cmd:0x%x\n", mmc_hostname(sdhost->mmc),
 		       sdhost->mrq->cmd->opcode);
 

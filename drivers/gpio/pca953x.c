@@ -195,7 +195,7 @@ static int pca953x_gpio_direction_output(struct gpio_chip *gc,
 		offset = PCA957X_OUT;
 		break;
 	}
-	ret = pca953x_write_reg(chip, offset, reg_val);
+//HJPARK	ret = pca953x_write_reg(chip, offset, reg_val);
 	if (ret)
 		goto exit;
 

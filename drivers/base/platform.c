@@ -486,7 +486,6 @@ int __init_or_module platform_driver_probe(struct platform_driver *drv,
 	/* temporary section violation during probe() */
 	drv->probe = probe;
 	retval = code = platform_driver_register(drv);
-
 	/*
 	 * Fixup that section violation, being paranoid about code scanning
 	 * the list of drivers in order to probe new devices.  Check to see

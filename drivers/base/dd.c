@@ -132,6 +132,7 @@ static int really_probe(struct device *dev, struct device_driver *drv)
 	}
 
 	driver_bound(dev);
+
 	ret = 1;
 	pr_debug("bus: '%s': %s: bound device %s to driver %s\n",
 		 drv->bus->name, __func__, dev_name(dev), drv->name);

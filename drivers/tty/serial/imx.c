@@ -46,6 +46,7 @@
 #include <linux/rational.h>
 #include <linux/slab.h>
 #include <linux/dma-mapping.h>
+#include <linux/delay.h>		//HJPARK
 
 #include <asm/io.h>
 #include <asm/irq.h>
@@ -415,6 +416,8 @@ static void dma_tx_callback(void *data)
 	schedule_work(&sport->tsk_dma_tx);
 }
 
+int RX_DMA_DONE = 1;            //HJPARK
+
 static void dma_tx_work(struct work_struct *w)
 {
 	struct imx_port *sport = container_of(w, struct imx_port, tsk_dma_tx);
@@ -425,6 +428,9 @@ static void dma_tx_work(struct work_struct *w)
 	enum dma_status status;
 	unsigned long flags;
 	int ret;
+
+while(!RX_DMA_DONE)		//HJPARK
+msleep(0.1);
 
 	status = chan->device->device_tx_status(chan, (dma_cookie_t)NULL, NULL);
 	if (DMA_IN_PROGRESS == status)
@@ -785,6 +791,7 @@ static int start_rx_dma(struct imx_port *sport);
 
 static void dma_rx_work(struct work_struct *w)
 {
+RX_DMA_DONE=0;
 	struct imx_port *sport = container_of(w, struct imx_port, tsk_dma_rx);
 	struct tty_struct *tty = sport->port.state->port.tty;
 
@@ -796,6 +803,7 @@ static void dma_rx_work(struct work_struct *w)
 
 	if (sport->dma_is_rxing)
 		start_rx_dma(sport);
+RX_DMA_DONE=1;		//HJPARK
 }
 
 static void imx_finish_dma(struct imx_port *sport)

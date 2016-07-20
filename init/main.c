@@ -103,6 +103,7 @@ extern void tc_init(void);
  * operations which are not allowed with IRQ disabled are allowed while the
  * flag is set.
  */
+int smc_permission = 0;
 bool early_boot_irqs_disabled __read_mostly;
 
 enum system_states system_state __read_mostly;
@@ -308,7 +309,7 @@ __setup("rdinit=", rdinit_setup);
 static const unsigned int setup_max_cpus = NR_CPUS;
 #ifdef CONFIG_X86_LOCAL_APIC
 static void __init smp_init(void)
-{
+{rese
 	APIC_init_uniprocessor();
 }
 #else
@@ -371,6 +372,10 @@ static noinline void __init_refok rest_init(void)
 	schedule();
 	preempt_disable();
 
+	/*kwlee: turn to secure boot*/
+/*	asm volatile("mov r0, #0x7\n");
+	asm volatile(".word 0xE1600070");
+*/
 	/* Call into cpu_idle with preempt disabled */
 	cpu_idle();
 }
@@ -455,11 +460,18 @@ static void __init mm_init(void)
 
 asmlinkage void __init start_kernel(void)
 {
+        //HJPARK
+        unsigned long *tte_addr=0x80004c10;
+
 	char * command_line;
 	extern const struct kernel_param __start___param[], __stop___param[];
 
 	smp_setup_processor_id();
-
+/*
+        asm volatile("str  r0,[sp]\n;""mov r0, #8\n;");         //HJPARK T_SMC_SWITCH_BOOT
+        asm volatile(".word 0xE1600070\n");
+        asm volatile("ldr r0, [sp]\n");
+*/
 	/*
 	 * Need to run as early as possible, to initialize the
 	 * lockdep hash:
@@ -488,6 +500,10 @@ asmlinkage void __init start_kernel(void)
 	setup_arch(&command_line);
 	mm_init_owner(&init_mm, &init_task);
 	mm_init_cpumask(&init_mm);
+
+        //HJPARK
+        *tte_addr=0x30411c0e;
+
 	setup_command_line(command_line);
 	setup_nr_cpu_ids();
 	setup_per_cpu_areas();
@@ -511,7 +527,6 @@ asmlinkage void __init start_kernel(void)
 	sort_main_extable();
 	trap_init();
 	mm_init();
-
 	/*
 	 * Set up the scheduler prior starting any interrupts (such as the
 	 * timer interrupt). Full topology setup happens at smp_init()
@@ -753,6 +768,10 @@ static noinline int init_post(void)
 		printk(KERN_WARNING "Failed to execute %s\n",
 				ramdisk_execute_command);
 	}
+	/*kwlee: turn to secure boot*/
+/*	asm volatile("mov r0, #0x7\n");
+	asm volatile(".word 0xE1600070");
+*/
 
 	/*
 	 * We try each of these until one succeeds.
@@ -765,6 +784,7 @@ static noinline int init_post(void)
 		printk(KERN_WARNING "Failed to execute %s.  Attempting "
 					"defaults...\n", execute_command);
 	}
+	smc_permission = 0;
 	run_init_process("/sbin/init");
 	run_init_process("/etc/init");
 	run_init_process("/bin/init");
@@ -816,6 +836,10 @@ static int __init kernel_init(void * unused)
 	 * the work
 	 */
 
+	/*HJPARK*/
+        msleep(1000);
+//	asm volatile("b .\n");
+	
 	if (!ramdisk_execute_command)
 		ramdisk_execute_command = "/init";
 

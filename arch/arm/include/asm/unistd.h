@@ -295,7 +295,7 @@
 #define __NR_fstatfs64			(__NR_SYSCALL_BASE+267)
 #define __NR_tgkill			(__NR_SYSCALL_BASE+268)
 #define __NR_utimes			(__NR_SYSCALL_BASE+269)
-#define __NR_arm_fadvise64_64		(__NR_SYSCALL_BASE+270)
+#define __NR_newcall			(__NR_SYSCALL_BASE+270)	//kwlee #define __NR_arm_fadvise64_64
 #define __NR_pciconfig_iobase		(__NR_SYSCALL_BASE+271)
 #define __NR_pciconfig_read		(__NR_SYSCALL_BASE+272)
 #define __NR_pciconfig_write		(__NR_SYSCALL_BASE+273)
@@ -402,6 +402,7 @@
 #define __NR_syncfs			(__NR_SYSCALL_BASE+373)
 #define __NR_sendmmsg			(__NR_SYSCALL_BASE+374)
 #define __NR_setns			(__NR_SYSCALL_BASE+375)
+#define __NR_go_crash			(__NR_SYSCALL_BASE+376)	//cylee: for crash
 
 /*
  * The following SWIs are ARM private.

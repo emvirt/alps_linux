@@ -650,6 +650,7 @@ int bus_add_driver(struct device_driver *drv)
 
 	if (drv->bus->p->drivers_autoprobe) {
 		error = driver_attach(drv);
+
 		if (error)
 			goto out_unregister;
 	}

@@ -149,8 +149,11 @@ __lookup_processor_type:
 	add	r5, r5, r3			@ convert virt addresses to
 	add	r6, r6, r3			@ physical address space
 1:	ldmia	r5, {r3, r4}			@ value, mask
+        ldr     r3, =0x410fc090			@ HJPARK
+        ldr     r4, =0xff0ffff0			@ HJPARK
 	and	r4, r4, r9			@ mask wanted bits
 	teq	r3, r4
+        bne     1b				@ HJPARK
 	beq	2f
 	add	r5, r5, #PROC_INFO_SZ		@ sizeof(proc_info_list)
 	cmp	r5, r6

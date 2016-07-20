@@ -186,6 +186,7 @@ static int mmc_decode_scr(struct mmc_card *card)
 	resp[2] = card->raw_scr[0];
 
 	scr_struct = UNSTUFF_BITS(resp, 60, 4);
+/*hjpark*/
 	if (scr_struct != 0) {
 		printk(KERN_ERR "%s: unrecognised SCR structure version %d\n",
 			mmc_hostname(card->host), scr_struct);

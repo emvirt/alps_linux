@@ -572,7 +572,6 @@ static int __init i2c_imx_probe(struct platform_device *pdev)
 	/* Set up chip registers to defaults */
 	writeb(0, i2c_imx->base + IMX_I2C_I2CR);
 	writeb(0, i2c_imx->base + IMX_I2C_I2SR);
-
 	/* Add I2C adapter */
 	ret = i2c_add_numbered_adapter(&i2c_imx->adapter);
 	if (ret < 0) {
@@ -653,6 +652,7 @@ static int __init i2c_adap_imx_init(void)
 {
 	return platform_driver_probe(&i2c_imx_driver, i2c_imx_probe);
 }
+//HJPARK 
 subsys_initcall(i2c_adap_imx_init);
 
 static void __exit i2c_adap_imx_exit(void)

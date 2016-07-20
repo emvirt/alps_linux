@@ -1779,6 +1779,10 @@ void mmc_rescan(struct work_struct *work)
 	if (host->rescan_disable)
 		return;
 
+	/*kwlee*/
+	if (host->index == 0 )
+		return;
+
 	mmc_bus_get(host);
 
 	/*

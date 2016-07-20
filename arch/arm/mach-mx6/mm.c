@@ -32,6 +32,9 @@
 #include <asm/hardware/cache-l2x0.h>
 #include "crm_regs.h"
 
+// cylee: definitions for tzipc
+#include <asm/tzipc_mem.h>
+
 /*!
  * This structure defines the MX6 memory map.
  */
@@ -56,6 +59,18 @@ static struct map_desc mx6_io_desc[] __initdata = {
 	.pfn = __phys_to_pfn(ARM_PERIPHBASE),
 	.length = ARM_PERIPHBASE_SIZE,
 	.type = MT_DEVICE},
+	//HJPARK
+	{
+	.virtual = 0xf1f00000,
+	.pfn = __phys_to_pfn(0x7ff00000),
+	.length = 0x100000,
+	.type = MT_MEMORY},
+	//cylee
+	{
+	.virtual = tzipc_phys_to_virt(TZIPC_PHYS_MEM_ADDR),
+	.pfn = __phys_to_pfn(TZIPC_PHYS_MEM_ADDR),
+	.length = TZIPC_TOTAL_MEM_SIZE,
+	.type = MT_DEVICE/*MT_MEMORY*/},
 };
 
 static void mx6_set_cpu_type(void)
@@ -107,7 +122,7 @@ int mxc_init_l2x0(void)
 		val &= ~IOMUXC_GPR11_L2CACHE_AS_OCRAM;
 		writel(val, IOMUXC_GPR11);
 	}
-
+/*HJPARK
 	writel(0x132, IO_ADDRESS(L2_BASE_ADDR + L2X0_TAG_LATENCY_CTRL));
 	writel(0x132, IO_ADDRESS(L2_BASE_ADDR + L2X0_DATA_LATENCY_CTRL));
 
@@ -118,11 +133,11 @@ int mxc_init_l2x0(void)
 	val |= L2X0_DYNAMIC_CLK_GATING_EN;
 	val |= L2X0_STNDBY_MODE_EN;
 	writel(val, IO_ADDRESS(L2_BASE_ADDR + L2X0_POWER_CTRL));
-
+*/
 	l2x0_init(IO_ADDRESS(L2_BASE_ADDR), 0x0, ~0x00000000);
 	return 0;
 }
 
 
-arch_initcall(mxc_init_l2x0);
+arch_initcall(mxc_init_l2x0);	//kwlee
 #endif

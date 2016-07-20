@@ -541,7 +541,9 @@ i2c_new_device(struct i2c_adapter *adap, struct i2c_board_info const *info)
 
 	dev_set_name(&client->dev, "%d-%04x", i2c_adapter_id(adap),
 		     client->addr);
+
 	status = device_register(&client->dev);
+
 	if (status)
 		goto out_err;
 
@@ -863,6 +865,7 @@ static int i2c_register_adapter(struct i2c_adapter *adap)
 	if (adap->nr < __i2c_first_dynamic_bus_num)
 		i2c_scan_static_board_info(adap);
 
+
 	/* Notify drivers */
 	mutex_lock(&core_lock);
 	bus_for_each_drv(&i2c_bus_type, NULL, adap, __process_new_adapter);
@@ -962,6 +965,7 @@ retry:
 
 	if (status == 0)
 		status = i2c_register_adapter(adap);
+
 	return status;
 }
 EXPORT_SYMBOL_GPL(i2c_add_numbered_adapter);

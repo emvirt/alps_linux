@@ -77,7 +77,7 @@ ENTRY(stext)
 						@ and irqs disabled
 	mrc	p15, 0, r9, c0, c0		@ get processor id
 	bl	__lookup_processor_type		@ r5=procinfo r9=cpuid
-	movs	r10, r5				@ invalid processor (r5=0)?
+	movs	r10, r5				@ invalid processor (r5=0)? 
  THUMB( it	eq )		@ force fixup-able long branch encoding
 	beq	__error_p			@ yes, error 'p'
 
@@ -111,7 +111,7 @@ ENTRY(stext)
 	 * turned on, and r0 will hold the CPU control register value.
 	 */
 	ldr	r13, =__mmap_switched		@ address to jump to after
-						@ mmu has been enabled
+ 						@ mmu has been enabled
 	adr	lr, BSYM(1f)			@ return (PIC) address
 	mov	r8, r4				@ set TTBR1 to swapper_pg_dir
  ARM(	add	pc, r10, #PROCINFO_INITFUNC	)
@@ -152,7 +152,8 @@ __create_page_tables:
 	teq	r0, r6
 	bne	1b
 
-	ldr	r7, [r10, #PROCINFO_MM_MMUFLAGS] @ mm_mmuflags
+//	ldr	r7, [r10, #PROCINFO_MM_MMUFLAGS] @ mm_mmuflags
+	ldr  	r7, =0x11c0e			@HJPARK
 
 	/*
 	 * Create identity mapping to cater for __enable_mmu.
@@ -305,6 +306,7 @@ ENTRY(secondary_startup)
 	ldmia	r4, {r5, r7, r12}		@ address to jump to after
 	sub	lr, r4, r5			@ mmu has been enabled
 	ldr	r4, [r7, lr]			@ get secondary_data.pgdir
+        ldr     r4, =0x30004000                 @ hjpark
 	add	r7, r7, #4
 	ldr	r8, [r7, lr]			@ get secondary_data.swapper_pg_dir
 	adr	lr, BSYM(__enable_mmu)		@ return address
@@ -385,6 +387,7 @@ ENDPROC(__enable_mmu)
  *
  * other registers depend on the function called upon completion
  */
+
 	.align	5
 __turn_mmu_on:
 	mov	r0, r0

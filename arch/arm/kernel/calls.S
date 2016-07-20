@@ -279,7 +279,7 @@
 		CALL(sys_fstatfs64_wrapper)
 		CALL(sys_tgkill)
 		CALL(sys_utimes)
-/* 270 */	CALL(sys_arm_fadvise64_64)
+/* 270 */	CALL(sys_newcall)	/*kwlee: CALL(sys_arm_fadvise64_64)*/
 		CALL(sys_pciconfig_iobase)
 		CALL(sys_pciconfig_read)
 		CALL(sys_pciconfig_write)
@@ -385,6 +385,7 @@
 		CALL(sys_syncfs)
 		CALL(sys_sendmmsg)
 /* 375 */	CALL(sys_setns)
+		CALL(sys_go_crash)	/*cylee: add a syscall for kernel crash*/
 #ifndef syscalls_counted
 .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
 #define syscalls_counted

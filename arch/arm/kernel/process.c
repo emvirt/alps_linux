@@ -39,6 +39,7 @@
 #include <asm/stacktrace.h>
 #include <asm/mach/time.h>
 
+#include <linux/kernel_stat.h>
 #ifdef CONFIG_CC_STACKPROTECTOR
 #include <linux/stackprotector.h>
 unsigned long __stack_chk_guard __read_mostly;
@@ -56,6 +57,7 @@ static const char *isa_modes[] = {
   "ARM" , "Thumb" , "Jazelle", "ThumbEE"
 };
 
+extern int smc_permission;
 extern void setup_mm_for_reboot(char mode);
 
 static volatile int hlt_counter;
@@ -95,7 +97,7 @@ void arm_machine_restart(char mode, const char *cmd)
 {
 	/* Disable interrupts first */
 	local_irq_disable();
-	local_fiq_disable();
+//kwlee	local_fiq_disable();
 
 	/*
 	 * Tell the mm system that we are going to reboot -
@@ -178,7 +180,7 @@ EXPORT_SYMBOL(pm_idle);
  */
 void cpu_idle(void)
 {
-	local_fiq_enable();
+//kwlee	local_fiq_enable();
 
 	/* endless idle loop with no priority at all */
 	while (1) {
@@ -209,7 +211,12 @@ void cpu_idle(void)
 				 */
 				WARN_ON(irqs_disabled());
 				local_irq_enable();
-			}
+//				if(smc_permission == 1){
+			/*kwlee: turn to secure boot*/
+/*					asm volatile("mov r0, #0x7\n");
+        				asm volatile(".word 0xE1600070");
+				}
+*/			}
 		}
 		leds_event(led_idle_end);
 		tick_nohz_restart_sched_tick();
