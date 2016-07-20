@@ -56,8 +56,7 @@ enum ipi_msg_type {
 	IPI_CALL_FUNC,
 	IPI_CALL_FUNC_SINGLE,
 	IPI_CPU_STOP,
-        IPI_TZIPC,              //hjpark
-        IPI_NT_SWITCH,          //hjpark
+        IPI_TZIPC,              //IPI from secure world
 };
 
 static DECLARE_COMPLETION(cpu_running);
@@ -275,7 +274,6 @@ static void __cpuinit smp_store_cpu_info(unsigned int cpuid)
  */
 asmlinkage void __cpuinit secondary_start_kernel(void)
 {
-//hjpark asm volatile("b .\n");	//hjpark
 	struct mm_struct *mm = &init_mm;
 	unsigned int cpu = smp_processor_id();
 
@@ -300,7 +298,6 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 	 * Give the platform a chance to do its own initialisation.
 	 */
 	platform_secondary_init(cpu);
-//hjpark	asm volatile("b .\n");
 	notify_cpu_starting(cpu);
 
 	calibrate_delay();
@@ -322,16 +319,10 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 
 	local_irq_enable();
 	local_fiq_enable();
-/*
-        asm volatile("str  r0,[sp]\n;""mov r0, #8\n;");         //hjpark T_SMC_SWITCH_BOOT
-        asm volatile(".word 0xE1600070\n");
-        asm volatile("ldr r0, [sp]\n");
-*/
+
 	/*
 	 * OK, it's off to the idle thread for us
 	 */
-//        asm volatile("b .\n");
-	writel_relaxed(1, 0xf2a00100);		//hjpark
 	cpu_idle();
 }
 
@@ -558,11 +549,10 @@ static void ipi_cpu_stop(unsigned int cpu)
 		cpu_relax();
 }
 
-//hjpark
+/*HJPARK: restore IPI7 to FIQ by calling smc*/
 void nt_smc_call(){
-//        printk("IPI_NT_SWITCH \n");
 	asm volatile("push {r0} \n");
-        asm volatile("mov r0, #5\n;");         //hjpark T_SMC_SWITCH_BOOT
+        asm volatile("mov r0, #7\n;");         //NT_SMC_SET_IPI
         asm volatile(".word 0xE1600070\n");
 	asm volatile("pop {r0} \n");
 }
@@ -607,13 +597,9 @@ asmlinkage void __exception_irq_entry do_IPI(int ipinr, struct pt_regs *regs)
 		irq_exit();
 		break;
 
-	case IPI_TZIPC:				//hjpark
+	case IPI_TZIPC:				
 		nt_smc_call();
-		set_ready_to_read();	//cylee
-		break;
-
-	case IPI_NT_SWITCH:			//hjpark
-		nt_smc_call();
+		set_ready_to_read();	//CYLEE
 		break;
 
 	default:

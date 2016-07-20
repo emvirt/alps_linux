@@ -275,7 +275,6 @@ void __cpuinit calibrate_delay(void)
 		if (!printed)
 			pr_info("Calibrating delay loop... ");
 		lpj = calibrate_delay_converge();
-//HJPARK	lpj = 7905280;
 	}
 #ifdef CONFIG_SMP
 	per_cpu(cpu_data, this_cpu).loops_per_jiffy = lpj;

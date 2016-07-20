@@ -186,7 +186,8 @@ static int gic_set_affinity(struct irq_data *d, const struct cpumask *mask_val,
 		return -EINVAL;
 
 	mask = 0xff << shift;
-	bit = 15 << (cpu + shift);	//HJPARK
+//HJPARK	bit = 1 << (cpu + shift);
+	bit = 15 << (cpu + shift);	/*HJPARK: set interrupts passed to every core when it is triggered*/
 
 	spin_lock(&irq_controller_lock);
 	val = readl_relaxed(reg) & ~mask;
@@ -352,8 +353,6 @@ static void __cpuinit gic_cpu_init(struct gic_chip_data *gic)
 
 	writel_relaxed(0xf0, base + GIC_CPU_PRIMASK);
 	CP15_VBAR_WRITE(0xFFFF0000);
-//hjpark	writel_relaxed(1, base + GIC_CPU_CTRL);
-	
 }
 
 void gic_init(unsigned int gic_nr, unsigned int irq_start,

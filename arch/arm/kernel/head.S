@@ -306,7 +306,7 @@ ENTRY(secondary_startup)
 	ldmia	r4, {r5, r7, r12}		@ address to jump to after
 	sub	lr, r4, r5			@ mmu has been enabled
 	ldr	r4, [r7, lr]			@ get secondary_data.pgdir
-        ldr     r4, =0x30004000                 @ hjpark
+        ldr     r4, =0x30004000                 @ HJPARK
 	add	r7, r7, #4
 	ldr	r8, [r7, lr]			@ get secondary_data.swapper_pg_dir
 	adr	lr, BSYM(__enable_mmu)		@ return address

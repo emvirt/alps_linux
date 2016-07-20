@@ -372,10 +372,6 @@ static noinline void __init_refok rest_init(void)
 	schedule();
 	preempt_disable();
 
-	/*kwlee: turn to secure boot*/
-/*	asm volatile("mov r0, #0x7\n");
-	asm volatile(".word 0xE1600070");
-*/
 	/* Call into cpu_idle with preempt disabled */
 	cpu_idle();
 }
@@ -467,11 +463,6 @@ asmlinkage void __init start_kernel(void)
 	extern const struct kernel_param __start___param[], __stop___param[];
 
 	smp_setup_processor_id();
-/*
-        asm volatile("str  r0,[sp]\n;""mov r0, #8\n;");         //HJPARK T_SMC_SWITCH_BOOT
-        asm volatile(".word 0xE1600070\n");
-        asm volatile("ldr r0, [sp]\n");
-*/
 	/*
 	 * Need to run as early as possible, to initialize the
 	 * lockdep hash:
@@ -768,10 +759,6 @@ static noinline int init_post(void)
 		printk(KERN_WARNING "Failed to execute %s\n",
 				ramdisk_execute_command);
 	}
-	/*kwlee: turn to secure boot*/
-/*	asm volatile("mov r0, #0x7\n");
-	asm volatile(".word 0xE1600070");
-*/
 
 	/*
 	 * We try each of these until one succeeds.
@@ -838,7 +825,6 @@ static int __init kernel_init(void * unused)
 
 	/*HJPARK*/
         msleep(1000);
-//	asm volatile("b .\n");
 	
 	if (!ramdisk_execute_command)
 		ramdisk_execute_command = "/init";

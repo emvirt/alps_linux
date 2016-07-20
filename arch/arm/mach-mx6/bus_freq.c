@@ -230,9 +230,9 @@ void reduce_bus_freq(void)
 
 static void reduce_bus_freq_handler(struct work_struct *work)
 {
-//while(!high_cpu_freq);		//HJPARK
-if(!high_cpu_freq)
-return;
+	/*HJPARK*/
+	if(!high_cpu_freq)
+		return;
 
 	mutex_lock(&bus_freq_mutex);
 

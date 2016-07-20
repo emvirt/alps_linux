@@ -1040,11 +1040,6 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 		flags |= SDHCI_CMD_DATA;
 
 	sdhci_writew(host, SDHCI_MAKE_CMD(cmd->opcode, flags), SDHCI_COMMAND);
-/*
-	usdhc_state = readl(0xc0960024);
-	if(usdhc_state!=0xff888088)
-		printk("============%d============\n",usdhc_state);	//HJPARK
-*/
 }
 
 static void sdhci_finish_command(struct sdhci_host *host)

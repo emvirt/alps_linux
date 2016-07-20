@@ -579,22 +579,9 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
 
 			writel(imx_data->scratchpad,
 				host->ioaddr + SDHCI_MIX_CTRL);
-/*HJPARK
-                        if(val==0x123A || val==0xC1B || val==0x341A || val==0x0 || val==0x081A || val==0x502 || val==0x371A || val==0x2902 || val==0x209 || val==0x31A || val==0x909 || val==0x71A || val==0x333A || val==0xD3A || val==0x63A || val==0x61A || val==0x193A)          //HJPARK
-                                writel(val << 16,
-                                        host->ioaddr + SDHCI_TRANSFER_MODE);
-                        else{
-                                printk("error__%d\n",val);
-                                writel(val << 16,
-                                        host->ioaddr + SDHCI_TRANSFER_MODE);
-			}
-*/
+
 			writel(val << 16,
 				host->ioaddr + SDHCI_TRANSFER_MODE);
-//			sdhci_reg = readl(0xf2a01204);
-//			sdhci_reg &= 0x00400000;
-//			if(!sdhci_reg)
-//				printk("==========val__%d============\n",val);
 		} else {
 			writel(val << 16 | imx_data->scratchpad,
 				host->ioaddr + SDHCI_TRANSFER_MODE);
