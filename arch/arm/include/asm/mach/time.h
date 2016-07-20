@@ -11,7 +11,7 @@
 #define __ASM_ARM_MACH_TIME_H
 
 #include <linux/sysdev.h>
-
+//hjpark #include <linux/interrupt.h>
 /*
  * This is our kernel timer structure.
  *
@@ -43,5 +43,15 @@ struct sys_timer {
 };
 
 extern void timer_tick(void);
+//kwlee
+
+//hjpark extern struct irqaction mxc_timer_irq; 
+/*{
+	.name		= "i.MX Timer Tick",
+	.flags		= IRQF_DISABLED | IRQF_TIMER | IRQF_IRQPOLL,
+	.handler	,
+};*/
+
+
 
 #endif

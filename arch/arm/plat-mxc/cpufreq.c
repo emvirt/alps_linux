@@ -369,6 +369,7 @@ static int __devinit mxc_cpufreq_init(struct cpufreq_policy *policy)
 	}
 
 	cpufreq_frequency_table_get_attr(imx_freq_table, policy->cpu);
+
 	return 0;
 err:
 	kfree(imx_freq_table);

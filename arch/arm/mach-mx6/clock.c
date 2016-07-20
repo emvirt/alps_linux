@@ -207,8 +207,18 @@ static void __calc_pre_post_dividers(u32 max_podf, u32 div, u32 *pre, u32 *post)
 static int _clk_enable(struct clk *clk)
 {
 	u32 reg;
+	u32 usdhc1_reg;
 	reg = __raw_readl(clk->enable_reg);
-	reg |= MXC_CCM_CCGRx_CG_MASK << clk->enable_shift;
+/*HJPARK*/
+        if(clk->enable_reg == 0xf40c4080){
+                usdhc1_reg = reg;
+                usdhc1_reg &= 0xc;
+                reg |= MXC_CCM_CCGRx_CG_MASK << clk->enable_shift;
+                reg |= usdhc1_reg;
+        }
+        else
+		reg |= MXC_CCM_CCGRx_CG_MASK << clk->enable_shift;
+
 	__raw_writel(reg, clk->enable_reg);
 
 	return 0;
@@ -217,8 +227,18 @@ static int _clk_enable(struct clk *clk)
 static void _clk_disable(struct clk *clk)
 {
 	u32 reg;
+	u32 usdhc1_reg;
 	reg = __raw_readl(clk->enable_reg);
-	reg &= ~(MXC_CCM_CCGRx_CG_MASK << clk->enable_shift);
+/*HJPARK*/
+        if(clk->enable_reg == 0xf40c4080){
+                usdhc1_reg = reg;
+                usdhc1_reg &= 0xc;
+                reg &= ~(MXC_CCM_CCGRx_CG_MASK << clk->enable_shift);
+                reg |= usdhc1_reg;
+        }
+        else
+		reg &= ~(MXC_CCM_CCGRx_CG_MASK << clk->enable_shift);
+
 	__raw_writel(reg, clk->enable_reg);
 }
 

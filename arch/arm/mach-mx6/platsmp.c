@@ -62,10 +62,10 @@ void __cpuinit platform_secondary_init(unsigned int cpu)
 
 int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
 {
+
 	unsigned long boot_entry;
 	void __iomem *src_base = IO_ADDRESS(SRC_BASE_ADDR);
 	unsigned int val;
-
 	 /*
 	  * set synchronisation state between this boot processor
 	  * and the secondary one
@@ -73,7 +73,9 @@ int __cpuinit boot_secondary(unsigned int cpu, struct task_struct *idle)
 	spin_lock(&boot_lock);
 
 	/* set entry point for cpu1-cpu3*/
-	boot_entry = virt_to_phys(mx6_secondary_startup);
+//HJPARK	boot_entry = virt_to_phys(mx6_secondary_startup);
+
+	boot_entry = 0x7ff114c0;	/*HJPARK: monitor 'SafeGSecondaryBoot' address*/
 
 	writel(boot_entry, src_base + SRC_GPR1_OFFSET + 4 * 2 * cpu);
 	writel(0, src_base + SRC_GPR1_OFFSET + 4 * 2 * cpu + 4);

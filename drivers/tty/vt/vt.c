@@ -2406,10 +2406,12 @@ static void console_callback(struct work_struct *ignored)
 			vc->vc_sw->con_scrolldelta(vc, scrollback_delta);
 		scrollback_delta = 0;
 	}
+
 	if (blank_timer_expired) {
 		do_blank_screen(0);
 		blank_timer_expired = 0;
 	}
+
 	notify_update(vc_cons[fg_console].d);
 
 	console_unlock();
@@ -3847,7 +3849,8 @@ static void blank_screen_t(unsigned long dummy)
 		mod_timer(&console_timer, jiffies + (blankinterval * HZ));
 		return;
 	}
-	blank_timer_expired = 1;
+//HJPARK	blank_timer_expired = 1;
+ 	blank_timer_expired = 0;
 	schedule_work(&console_work);
 }
 

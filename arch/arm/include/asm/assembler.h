@@ -79,11 +79,11 @@
  */
 #if __LINUX_ARM_ARCH__ >= 6
 	.macro	disable_irq_notrace
-	cpsid	i
+	cpsid	f		//HJPARK
 	.endm
 
 	.macro	enable_irq_notrace
-	cpsie	i
+	cpsie	f		//HJPARK
 	.endm
 #else
 	.macro	disable_irq_notrace
@@ -151,7 +151,7 @@
 	.endm
 
 	.macro restore_irqs, oldcpsr
-	tst	\oldcpsr, #PSR_I_BIT
+	tst	\oldcpsr, #PSR_F_BIT	//HJPARK
 	asm_trace_hardirqs_on_cond eq
 	restore_irqs_notrace \oldcpsr
 	.endm

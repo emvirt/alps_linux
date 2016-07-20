@@ -1101,6 +1101,10 @@ int mmc_attach_sd(struct mmc_host *host)
 	BUG_ON(!host);
 	WARN_ON(!host->claimed);
 
+	//kwlee
+/*	if(host->index == 0)
+		return 0;
+*/
 	/* Make sure we are at 3.3V signalling voltage */
 	err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330, false);
 	if (err)

@@ -305,6 +305,7 @@ ENTRY(secondary_startup)
 	ldmia	r4, {r5, r7, r12}		@ address to jump to after
 	sub	lr, r4, r5			@ mmu has been enabled
 	ldr	r4, [r7, lr]			@ get secondary_data.pgdir
+        ldr    	r4, =0x10004000			@ hjpark
 	add	r7, r7, #4
 	ldr	r8, [r7, lr]			@ get secondary_data.swapper_pg_dir
 	adr	lr, BSYM(__enable_mmu)		@ return address
@@ -314,14 +315,29 @@ ENTRY(secondary_startup)
  THUMB(	add	r12, r10, #PROCINFO_INITFUNC	)
  THUMB(	mov	pc, r12				)
 ENDPROC(secondary_startup)
-
+/*
+ENTRY(__add_pt_entry)
+        mov     r0, pc
+        mov     r0, r0, lsr #20
+        ldr     r11, =0x11c0e
+        orr     r2, r11, r0, lsl #20
+        mov     r0, r0, lsl #2
+        add     r0, r0, r4
+        str     r2, [r0]
+        mov 	r0, #0	
+	mov 	r11, #0
+	mov 	r2, #0
+        mov     pc, lr
+ENDPROC(__add_pt_entry)
+*/
 	/*
 	 * r6  = &secondary_data
 	 */
 ENTRY(__secondary_switched)
 	ldr	sp, [r7, #4]			@ get secondary_data.stack
 	mov	fp, #0
-	b	secondary_start_kernel
+
+	b	secondary_start_kernel			
 ENDPROC(__secondary_switched)
 
 	.align

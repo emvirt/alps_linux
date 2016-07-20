@@ -257,7 +257,7 @@ static irqreturn_t mxc_timer_interrupt(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
+/*kwlee */
 static struct irqaction mxc_timer_irq = {
 	.name		= "i.MX Timer Tick",
 	.flags		= IRQF_DISABLED | IRQF_TIMER | IRQF_IRQPOLL,

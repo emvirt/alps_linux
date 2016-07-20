@@ -54,7 +54,6 @@ ENDPROC(v7_invalidate_l1)
 
 	__CPUINIT
 ENTRY(mx6_secondary_startup)
-
 	/* Invalidate L1 I-cache first */
 	mov	r1,	#0x0
 	mcr p15, 0, r1, c7, c5, 0 @ Invalidate I-Cache

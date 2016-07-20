@@ -39,6 +39,10 @@
 #include <asm/tlbflush.h>
 #include <asm/ptrace.h>
 #include <asm/localtimer.h>
+#include <asm/mach/time.h>	/*kwlee*/
+
+//cylee : set a flag value for tzipc read in tzipc.c
+extern void set_ready_to_read(void);
 
 /*
  * as from 2.5, kernels no longer have an init_tasks structure
@@ -46,6 +50,8 @@
  * where to place its SVC stack
  */
 struct secondary_data secondary_data;
+//kwlee
+//struct irqaction mxc_timer_irq;
 
 enum ipi_msg_type {
 	IPI_TIMER = 2,
@@ -53,7 +59,11 @@ enum ipi_msg_type {
 	IPI_CALL_FUNC,
 	IPI_CALL_FUNC_SINGLE,
 	IPI_CPU_STOP,
+	IPI_TZIPC,		//hjpark
+	IPI_T_SWITCH,		//hjpark
 };
+
+
 
 static DECLARE_COMPLETION(cpu_running);
 
@@ -270,9 +280,11 @@ static void __cpuinit smp_store_cpu_info(unsigned int cpuid)
  */
 asmlinkage void __cpuinit secondary_start_kernel(void)
 {
+//HJPARK __asm__("b	.\n");		
+
 	struct mm_struct *mm = &init_mm;
 	unsigned int cpu = smp_processor_id();
-
+	
 	/*
 	 * All kernel threads share the same mm context; grab a
 	 * reference and switch to it.
@@ -316,7 +328,11 @@ asmlinkage void __cpuinit secondary_start_kernel(void)
 
 	local_irq_enable();
 	local_fiq_enable();
-
+      /* 
+ 	asm volatile("str  r0,[sp]\n;""mov r0, #3\n;");         //hjpark T_SMC_SWITCH_BOOT
+        asm volatile(".word 0xE1600070\n");
+        asm volatile("ldr r0, [sp]\n");
+*/
 	/*
 	 * OK, it's off to the idle thread for us
 	 */
@@ -370,6 +386,9 @@ void __init smp_prepare_cpus(unsigned int max_cpus)
 		 */
 		platform_smp_prepare_cpus(max_cpus);
 	}
+/*kwlee
+	mxc_timer_irq.flags=IRQF_DISABLED | IRQF_IRQPOLL;
+*/
 }
 
 static void (*smp_cross_call)(const struct cpumask *, unsigned int);
@@ -545,7 +564,14 @@ static void ipi_cpu_stop(unsigned int cpu)
 	while (1)
 		cpu_relax();
 }
-
+//hjpark
+void t_smc_call(){
+        printk("IPI_T_SWITCH \n");
+	
+        asm volatile("str  r0,[sp]\n;""mov r0, #3\n;");         //hjpark T_SMC_SWITCH_BOOT
+        asm volatile(".word 0xE1600070\n");
+        asm volatile("ldr r0, [sp]\n");
+}
 /*
  * Main handler for inter-processor interrupts
  */
@@ -584,6 +610,14 @@ asmlinkage void __exception_irq_entry do_IPI(int ipinr, struct pt_regs *regs)
 		irq_enter();
 		ipi_cpu_stop(cpu);
 		irq_exit();
+		break;
+	
+	case IPI_TZIPC:			//HJPARK
+		set_ready_to_read();    //cylee
+		break;
+	
+	case IPI_T_SWITCH:		//hjpark
+		t_smc_call();
 		break;
 
 	default:

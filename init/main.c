@@ -455,6 +455,11 @@ static void __init mm_init(void)
 
 asmlinkage void __init start_kernel(void)
 {
+        //kwlee
+        unsigned long *addr=0x80006800;		//v_addr 0x3000000--0x30e00000 
+	//HJPARK
+	unsigned long *tte_addr=0x80004410;
+
 	char * command_line;
 	extern const struct kernel_param __start___param[], __stop___param[];
 
@@ -488,6 +493,16 @@ asmlinkage void __init start_kernel(void)
 	setup_arch(&command_line);
 	mm_init_owner(&init_mm, &init_task);
 	mm_init_cpumask(&init_mm);
+
+        /*kwlee
+        while(addr<=0x80006838){
+                *addr=0;
+                addr++;
+        }
+	*/
+	//HJPARK
+	*tte_addr=0x10411c0e;
+
 	setup_command_line(command_line);
 	setup_nr_cpu_ids();
 	setup_per_cpu_areas();
@@ -540,13 +555,15 @@ asmlinkage void __init start_kernel(void)
 	hrtimers_init();
 	softirq_init();
 	timekeeping_init();
-	time_init();
+        time_init();
 	profile_init();
 	call_function_init();
 	if (!irqs_disabled())
 		printk(KERN_CRIT "start_kernel(): bug: interrupts were "
 				 "enabled early\n");
 	early_boot_irqs_disabled = false;
+//hjpark
+//        local_fiq_enable();
 	local_irq_enable();
 
 	kmem_cache_init_late();
@@ -588,6 +605,11 @@ asmlinkage void __init start_kernel(void)
 	if (late_time_init)
 		late_time_init();
 	sched_clock_init();
+/*
+        asm volatile("str  r0,[sp]\n;""mov r0, #2\n;");         //hjpark T_SMC_SWITCH_BOOT
+        asm volatile(".word 0xE1600070\n");
+        asm volatile("ldr r0, [sp]\n");
+*/
 	calibrate_delay();
 	pidmap_init();
 	anon_vma_init();

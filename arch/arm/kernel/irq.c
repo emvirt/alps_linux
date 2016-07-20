@@ -97,12 +97,17 @@ void handle_IRQ(unsigned int irq, struct pt_regs *regs)
 	set_irq_regs(old_regs);
 }
 
+void global_timer_handler(void){
+	return;
+}
 /*
  * asm_do_IRQ is the interface to be used from assembly code.
  */
 asmlinkage void __exception_irq_entry
 asm_do_IRQ(unsigned int irq, struct pt_regs *regs)
 {
+	if(irq==27)
+		global_timer_handler();
 	handle_IRQ(irq, regs);
 }
 

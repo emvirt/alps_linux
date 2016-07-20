@@ -22,6 +22,7 @@
 
 #define GIC_DIST_CTRL			0x000
 #define GIC_DIST_CTR			0x004
+#define GIC_DIST_ISR                    0x080   /*kwlee: interrupt security register*/
 #define GIC_DIST_ENABLE_SET		0x100
 #define GIC_DIST_ENABLE_CLEAR		0x180
 #define GIC_DIST_PENDING_SET		0x200
@@ -30,6 +31,7 @@
 #define GIC_DIST_PRI			0x400
 #define GIC_DIST_TARGET			0x800
 #define GIC_DIST_CONFIG			0xc00
+#define GIC_DIST_PPI                    0xd00   /* kwlee: PPI register*/
 #define GIC_DIST_SOFTINT		0xf00
 
 #ifndef __ASSEMBLY__

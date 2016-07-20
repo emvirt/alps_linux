@@ -342,6 +342,7 @@ ENDPROC(ftrace_stub)
 
 	.align	5
 ENTRY(vector_swi)
+	cpsid	f	//HJPARK
 	sub	sp, sp, #S_FRAME_SIZE
 	stmia	sp, {r0 - r12}			@ Calling r0 - r12
  ARM(	add	r8, sp, #S_PC		)

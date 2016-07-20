@@ -843,6 +843,12 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 	raw_local_irq_save(flags);
 	this_cpu = smp_processor_id();
 
+//hjpark
+	p = "0[37;1m";
+	p[0] = 0x1b;
+	strcpy(printk_buf, p);
+	printed_len = strlen(p);
+
 	/*
 	 * Ouch, printk recursed into itself!
 	 */
@@ -864,6 +870,9 @@ asmlinkage int vprintk(const char *fmt, va_list args)
 	lockdep_off();
 	spin_lock(&logbuf_lock);
 	printk_cpu = this_cpu;
+
+	strcpy(printk_buf, p);
+        printed_len = strlen(p);
 
 	if (recursion_bug) {
 		recursion_bug = 0;

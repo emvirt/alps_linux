@@ -1441,6 +1441,8 @@ mxcfb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 	if (!(var->vmode & FB_VMODE_YWRAP)) {
 		dev_dbg(info->device, "Y wrap disabled\n");
 		fr_yoff = var->yoffset % info->var.yres;
+//		fr_yoff += 720;	//cylee : test
+//		fr_h = 360;	//cylee : test
 		fr_h = info->var.yres;
 		base += info->fix.line_length * info->var.yres *
 			(var->yoffset / info->var.yres);

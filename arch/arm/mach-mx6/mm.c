@@ -32,6 +32,9 @@
 #include <asm/hardware/cache-l2x0.h>
 #include "crm_regs.h"
 
+// cylee: definitions for tzipc
+#include <asm/tzipc_mem.h>
+
 /*!
  * This structure defines the MX6 memory map.
  */
@@ -56,6 +59,18 @@ static struct map_desc mx6_io_desc[] __initdata = {
 	.pfn = __phys_to_pfn(ARM_PERIPHBASE),
 	.length = ARM_PERIPHBASE_SIZE,
 	.type = MT_DEVICE},
+	//HJPARK
+	{
+	.virtual = 0xf1f00000,
+	.pfn = __phys_to_pfn(0x7ff00000),
+	.length = 0x100000,
+	.type = MT_MEMORY},
+	//cylee
+	{
+	.virtual = tzipc_phys_to_virt(TZIPC_PHYS_MEM_ADDR),
+	.pfn = __phys_to_pfn(TZIPC_PHYS_MEM_ADDR),
+	.length = TZIPC_TOTAL_MEM_SIZE,
+	.type = MT_DEVICE/*MT_MEMORY*/},
 };
 
 static void mx6_set_cpu_type(void)

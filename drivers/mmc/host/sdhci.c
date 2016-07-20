@@ -60,8 +60,8 @@ static void sdhci_clk_worker(struct work_struct *work)
 	struct sdhci_host *host =
 		container_of(work, struct sdhci_host, clk_worker.work);
 
-	if (host->ops->platform_clk_ctrl && host->clk_status)
-		host->ops->platform_clk_ctrl(host, false);
+//HJPARK	if (host->ops->platform_clk_ctrl && host->clk_status)
+//HJPARK		host->ops->platform_clk_ctrl(host, false);
 }
 
 static inline bool sdhci_is_sdio_attached(struct sdhci_host *host)
@@ -86,8 +86,8 @@ static void sdhci_disable_clk(struct sdhci_host *host, int delay)
 {
 	if (host->clk_mgr_en) {
 		if (delay == 0 && !in_interrupt()) {
-			if (host->ops->platform_clk_ctrl && host->clk_status)
-				host->ops->platform_clk_ctrl(host, false);
+//HJPARK	if (host->ops->platform_clk_ctrl && host->clk_status)
+//HJPARK			host->ops->platform_clk_ctrl(host, false);
 		} else
 			schedule_delayed_work(&host->clk_worker, delay);
 	}

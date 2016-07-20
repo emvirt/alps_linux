@@ -197,6 +197,8 @@ void cpu_idle(void)
 #endif
 			if (hlt_counter || tick_check_broadcast_pending()) {
 				local_irq_enable();
+//				asm volatile("mov r0, #0 \n");          //hjpark
+//                                asm volatile(".word 0xe1600070 ");      //hjpark
 				cpu_relax();
 			} else {
 				stop_critical_timings();
@@ -209,6 +211,8 @@ void cpu_idle(void)
 				 */
 				WARN_ON(irqs_disabled());
 				local_irq_enable();
+//				asm volatile("mov r0, #0 \n");          //hjpark
+//                                asm volatile(".word 0xe1600070 ");      //hjpark                                
 			}
 		}
 		leds_event(led_idle_end);

@@ -118,6 +118,8 @@
  */
 #define CHANGE_ENDIANNESS   0x80
 
+int sdma_init_state=0;          //hjpark
+
 /*
  * Mode/Count of data node descriptors - IPCv2
  */
@@ -549,6 +551,10 @@ static irqreturn_t sdma_int_handler(int irq, void *dev_id)
 	spin_lock_irqsave(&sdma->irq_reg_lock, flag);
 	stat = readl_relaxed(sdma->regs + SDMA_H_INTR);
 	writel_relaxed(stat, sdma->regs + SDMA_H_INTR);
+
+        if(sdma_init_state)
+                stat=1;                 //hjpark
+
 	spin_unlock_irqrestore(&sdma->irq_reg_lock, flag);
 
 	stat_bak = stat;
@@ -1496,6 +1502,8 @@ static int __init sdma_probe(struct platform_device *pdev)
 	struct sdma_platform_data *pdata = pdev->dev.platform_data;
 	int i;
 	struct sdma_engine *sdma;
+ 
+        sdma_init_state=1;              //hjpark
 
 	sdma = kzalloc(sizeof(*sdma), GFP_KERNEL);
 	if (!sdma)
@@ -1527,10 +1535,49 @@ static int __init sdma_probe(struct platform_device *pdev)
 		goto err_ioremap;
 	}
 
+//hjpark
+        sdma->script_addrs = kzalloc(sizeof(*sdma->script_addrs), GFP_KERNEL);
+        if (!sdma->script_addrs)
+                goto err_alloc;
+
+        sdma->version = pdata->sdma_version;
+
+        dma_cap_set(DMA_SLAVE, sdma->dma_device.cap_mask);
+        dma_cap_set(DMA_CYCLIC, sdma->dma_device.cap_mask);
+
+        spin_lock_init(&sdma->irq_reg_lock);
+
+        INIT_LIST_HEAD(&sdma->dma_device.channels);
+        /* Initialize channel parameters */
+        for (i = 0; i < MAX_DMA_CHANNELS; i++) {
+                struct sdma_channel *sdmac = &sdma->channel[i];
+
+                sdmac->sdma = sdma;
+                spin_lock_init(&sdmac->lock);
+
+                sdmac->chan.device = &sdma->dma_device;
+                sdmac->channel = i;
+
+                /*
+                 * Add the channel to the DMAC list. Do not add channel 0 though
+                 * because we need it internally in the SDMA driver. This also means
+                 * that channel 0 in dmaengine counting matches sdma channel 1.
+                 */
+                if (i)
+                        list_add_tail(&sdmac->chan.device_node,
+                                        &sdma->dma_device.channels);
+        }
+
+        ret = sdma_init(sdma);
+        if (ret)
+                goto err_init;
+
+//hjpark 
+
 	ret = request_irq(irq, sdma_int_handler, 0, "sdma", sdma);
 	if (ret)
 		goto err_request_irq;
-
+/*hjpark
 	sdma->script_addrs = kzalloc(sizeof(*sdma->script_addrs), GFP_KERNEL);
 	if (!sdma->script_addrs)
 		goto err_alloc;
@@ -1542,9 +1589,9 @@ static int __init sdma_probe(struct platform_device *pdev)
 
 	spin_lock_init(&sdma->irq_reg_lock);
 
-	INIT_LIST_HEAD(&sdma->dma_device.channels);
+	INIT_LIST_HEAD(&sdma->dma_device.channels);*/
 	/* Initialize channel parameters */
-	for (i = 0; i < MAX_DMA_CHANNELS; i++) {
+/*	for (i = 0; i < MAX_DMA_CHANNELS; i++) {
 		struct sdma_channel *sdmac = &sdma->channel[i];
 
 		sdmac->sdma = sdma;
@@ -1552,13 +1599,13 @@ static int __init sdma_probe(struct platform_device *pdev)
 
 		sdmac->chan.device = &sdma->dma_device;
 		sdmac->channel = i;
-
+*/
 		/*
 		 * Add the channel to the DMAC list. Do not add channel 0 though
 		 * because we need it internally in the SDMA driver. This also means
 		 * that channel 0 in dmaengine counting matches sdma channel 1.
 		 */
-		if (i)
+/*hjpark		if (i)
 			list_add_tail(&sdmac->chan.device_node,
 					&sdma->dma_device.channels);
 	}
@@ -1566,7 +1613,7 @@ static int __init sdma_probe(struct platform_device *pdev)
 	ret = sdma_init(sdma);
 	if (ret)
 		goto err_init;
-
+*/
 	if (pdata->script_addrs)
 		sdma_add_scripts(sdma, pdata->script_addrs);
 
@@ -1592,6 +1639,7 @@ static int __init sdma_probe(struct platform_device *pdev)
 
 	dev_info(sdma->dev, "initialized\n");
 
+        sdma_init_state=0;      //hjpark
 	return 0;
 
 err_init:
@@ -1607,6 +1655,8 @@ err_clk:
 err_request_region:
 err_irq:
 	kfree(sdma);
+
+        sdma_init_state=0;      //hjpark
 	return ret;
 }
 

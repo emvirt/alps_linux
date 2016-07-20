@@ -505,7 +505,7 @@ static void mvsd_timeout_timer(unsigned long data)
 	spin_lock_irqsave(&host->lock, flags);
 	mrq = host->mrq;
 	if (mrq) {
-		printk(KERN_ERR "%s: Timeout waiting for hardware interrupt.\n",
+		printk(KERN_ERR "%s: Secure mvsd Timeout waiting for hardware interrupt.\n",
 				mmc_hostname(host->mmc));
 		printk(KERN_ERR "%s: hw_state=0x%04x, intr_status=0x%04x "
 				"intr_en=0x%04x\n", mmc_hostname(host->mmc),
