@@ -478,6 +478,9 @@ ssize_t ipi_read(struct file *filp, char *buf, size_t count, loff_t *f_pos){
 	return ret;
 }
 
+char temp_in[16*1024];
+char temp_out[16*1024];
+
 /*
  * Function to write data to the shared memory between worlds
  * Parameters : 
@@ -532,6 +535,11 @@ ssize_t ipi_write(struct file *filp, const char *buf, size_t count, loff_t *f_po
 
 
 	requested_op = addr->request_op;
+
+	/* bgkim: add dummy memcpy for write */
+	if (addr->request_op == 2) {
+		memcpy(temp_out, temp_in, addr->buffer_len);
+	}
 	
 	ret = size;
 	//retflag = *(((unsigned int*)addr) + 1);
