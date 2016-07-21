@@ -518,6 +518,9 @@ int send_response_to_normal(char *buf, size_t count)
 	return ret;	
 }
 
+char temp_in[16*1024];
+char temp_out[16*1024];
+
 int nw_req_ID;
 //static int send_singal_to_user(void *arg)
 int send_singal_to_user(void *arg)
@@ -599,6 +602,11 @@ int send_singal_to_user(void *arg)
 			tz_debug_start_tmr();
 #endif //TZ_DEBUG_LEVEL_6
 
+			{
+				/* bgkim: add memcpy for read */
+				str_tzread* req = NW_req;
+				memcpy(temp_out, temp_in, req->buffer_len);
+			}
 			send_response_to_normal( func_ret_val, MAX_BUF_SIZE);
 			break;
 
